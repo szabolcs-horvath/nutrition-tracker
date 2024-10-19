@@ -5,12 +5,12 @@ MIGRATE_CLI_SOURCES ?= file
 MIGRATE_VERSION ?= v4.18.1
 GOOS ?= darwin
 GOARCH ?= amd64
-SQLITE_DB_FILE ?= sqlite/carbs-tracker.db
+SQLITE_DB_FILE ?= sqlite/nutrition-tracker.db
 SQLITE_MIGRATIONS_DIR ?= sqlite/migrations
 
 build:
 	sqlc generate
-	go build -o out/carbs-tracker
+	go build -o out/nutrition-tracker
 
 clean:
 	rm -rf /generated /out
