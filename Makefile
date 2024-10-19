@@ -13,7 +13,7 @@ build:
 	go build -o out/nutrition-tracker
 
 clean:
-	rm -rf /generated /out
+	rm -rf generated out
 
 migrate-up: build-migrate-cli
 	$(MIGRATE_CLI_BINARY_LOCATION)/migrate -source file://$(SQLITE_MIGRATIONS_DIR) -database sqlite3://$(SQLITE_DB_FILE) up
