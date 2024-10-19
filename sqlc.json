@@ -1,0 +1,19 @@
+{
+  "version": "2",
+  "sql": [
+    {
+      "engine": "sqlite",
+      "database": {
+        "uri": "${SQLITE3_DB_STRING}"
+      },
+      "schema": "sqlite/migrations",
+      "queries": "sqlite/queries",
+      "gen": {
+        "go": {
+          "package": "repository",
+          "out": "generated"
+        }
+      }
+    }
+  ]
+}
