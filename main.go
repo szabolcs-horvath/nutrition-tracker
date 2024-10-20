@@ -3,17 +3,12 @@ package main
 import (
 	"log"
 	"net/http"
+	"shorvath/nutrition-tracker/http_server"
 )
 
-func handleRoot(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Content-Type", "application/json")
-	_, err := w.Write([]byte("{\"test\":\"value\"}"))
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
 func main() {
-	http.HandleFunc("/", handleRoot)
-	log.Fatal(http.ListenAndServe(":80", nil))
+	for k, v := range http_server.GetRoutes() {
+		http.HandleFunc(k, v)
+	}
+	log.Fatalln(http.ListenAndServe(":80", nil))
 }
