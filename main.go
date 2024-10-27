@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"os"
+	"shorvath/nutrition-tracker/helpers"
 	"shorvath/nutrition-tracker/http_server"
 
 	"github.com/joho/godotenv"
@@ -15,7 +15,7 @@ func main() {
 		slog.Error("Failed to load .env file!")
 		panic(1)
 	}
-	port := os.Getenv("PORT")
+	port := helpers.SafeGetEnv("PORT")
 
 	for k, v := range http_server.GetRoutes() {
 		http.HandleFunc(k, v)
