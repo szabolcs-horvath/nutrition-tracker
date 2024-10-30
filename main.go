@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log/slog"
 	"net/http"
 	"shorvath/nutrition-tracker/helpers"
@@ -15,11 +14,15 @@ func main() {
 		slog.Error("Failed to load .env file!")
 		panic(1)
 	}
-	port := helpers.SafeGetEnv("PORT")
 
-	for k, v := range http_server.GetRoutes() {
-		http.HandleFunc(k, v)
+	router := http.NewServeMux()
+	api := http_server.ServeApiV1Routes(router)
+
+	server := http.Server{
+		Addr:    ":" + helpers.SafeGetEnv("PORT"),
+		Handler: api,
 	}
 
-	slog.Error("Exiting: %v", http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+	slog.Info("Starting server on address " + server.Addr)
+	server.ListenAndServe()
 }
