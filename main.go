@@ -18,7 +18,10 @@ func main() {
 
 	router := http.NewServeMux()
 	api := routes.ServeApiV1Routes(router)
-	middlewareStack := middleware.CreateStack(middleware.Log)
+	middlewareStack := middleware.CreateStack(
+		middleware.AddRequestId,
+		middleware.Log,
+	)
 
 	server := http.Server{
 		Addr:    ":" + helpers.SafeGetEnv("PORT"),
