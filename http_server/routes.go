@@ -6,7 +6,7 @@ import (
 )
 
 func ServeApiV1Routes(router *http.ServeMux) *http.ServeMux {
-	itemsApi := addRoutes(router, items.Prefix(), items.Routes())
+	itemsApi := addRoutes(router, items.Prefix, items.Routes())
 
 	v1 := http.NewServeMux()
 	v1.Handle("/v1/", http.StripPrefix("/v1", itemsApi))

@@ -8,9 +8,7 @@ import (
 	"strconv"
 )
 
-func Prefix() string {
-	return "/items"
-}
+const Prefix = "/items"
 
 func Routes() map[string]func(w http.ResponseWriter, r *http.Request) {
 	return map[string]func(w http.ResponseWriter, r *http.Request){
