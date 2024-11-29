@@ -1,13 +1,13 @@
 package main
 
 import (
+	"github.com/joho/godotenv"
 	"log/slog"
 	"net/http"
 	"shorvath/nutrition-tracker/helpers"
-	"shorvath/nutrition-tracker/http_server"
 	"shorvath/nutrition-tracker/http_server/middleware"
-
-	"github.com/joho/godotenv"
+	"shorvath/nutrition-tracker/http_server/routes"
+	"shorvath/nutrition-tracker/http_server/routes/api"
 )
 
 func main() {
@@ -17,7 +17,8 @@ func main() {
 	}
 
 	router := http.NewServeMux()
-	api := routes.ServeApiV1Routes(router)
+	routes.ServeRoute(router, api.Prefix, api.Routes())
+
 	middlewareStack := middleware.CreateStack(
 		middleware.AddRequestId,
 		middleware.Log,
@@ -25,7 +26,7 @@ func main() {
 
 	server := http.Server{
 		Addr:    ":" + helpers.SafeGetEnv("PORT"),
-		Handler: middlewareStack(api),
+		Handler: middlewareStack(router),
 	}
 
 	slog.Info("Starting server on address " + server.Addr)

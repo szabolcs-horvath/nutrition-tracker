@@ -5,21 +5,37 @@ import (
 	sqlc "shorvath/nutrition-tracker/generated"
 )
 
-func ConvertItem(itemSqlc sqlc.Item_sqlc, nutritionSqlc sqlc.Nutrition_sqlc) *Item {
-	return &Item{
-		ID:        itemSqlc.ID,
-		Name:      itemSqlc.Name,
-		Nutrition: *ConvertNutrition(nutritionSqlc),
-		Icon:      itemSqlc.Icon,
-	}
+type Item struct {
+	ID        int64
+	Name      string
+	Nutrition *Nutrition
+	Icon      []byte
 }
 
-func ConvertItemWithoutNutrition(itemSqlc sqlc.Item_sqlc) *Item {
+func convertItem(itemSqlc *sqlc.Item_sqlc) *Item {
 	return &Item{
 		ID:   itemSqlc.ID,
 		Name: itemSqlc.Name,
 		Icon: itemSqlc.Icon,
 	}
+}
+
+func ListItems(ctx context.Context) ([]*Item, error) {
+	db, err := GetDB()
+	if err != nil {
+		return nil, err
+	}
+	queries := sqlc.New(db)
+	list, err := queries.ListItemsWithNutritions(ctx)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*Item, len(list))
+	for i, n := range list {
+		result[i] = convertItem(&n.ItemSqlc)
+		result[i].Nutrition = convertNutrition(&n.NutritionSqlc)
+	}
+	return result, nil
 }
 
 func FindItemByIdWithNutrition(ctx context.Context, id int64) (*Item, error) {
@@ -32,33 +48,81 @@ func FindItemByIdWithNutrition(ctx context.Context, id int64) (*Item, error) {
 	if err != nil {
 		return nil, err
 	}
-	return ConvertItem(row.ItemSqlc, row.NutritionSqlc), nil
+	item := convertItem(&row.ItemSqlc)
+	item.Nutrition = convertNutrition(&row.NutritionSqlc)
+	return item, nil
 }
 
-func CreateItem(ctx context.Context, item Item) (*Item, error) {
+func CreateItem(ctx context.Context, item *Item) (*Item, error) {
 	db, err := GetDB()
 	if err != nil {
 		return nil, err
 	}
-	queries := sqlc.New(db)
-	tx, err := db.Begin()
-	if err != nil {
-		return nil, err
-	}
-	defer tx.Rollback()
-	nutrition, err := CreateNutrition(ctx, item.Nutrition)
-	if err != nil {
-		return nil, err
-	}
-	itemSqlc, err := queries.CreateItem(ctx, sqlc.CreateItemParams{
-		Name:        item.Name,
-		NutritionID: nutrition.ID,
-		Icon:        item.Icon,
+	var createdItem *Item
+	err = DoInTransaction(ctx, db, func() error {
+		queries := sqlc.New(db)
+		nutrition, createNutErr := CreateNutrition(ctx, item.Nutrition)
+		if createNutErr != nil {
+			return createNutErr
+		}
+		itemSqlc, createItemErr := queries.CreateItem(ctx, sqlc.CreateItemParams{
+			Name:        item.Name,
+			NutritionID: nutrition.ID,
+			Icon:        item.Icon,
+		})
+		if createItemErr != nil {
+			return createItemErr
+		}
+		createdItem = convertItem(&itemSqlc)
+		createdItem.Nutrition = nutrition
+		return nil
 	})
 	if err != nil {
 		return nil, err
 	}
-	createdItem := ConvertItemWithoutNutrition(itemSqlc)
-	createdItem.Nutrition = *nutrition
 	return createdItem, nil
+}
+
+func UpdateItem(ctx context.Context, item *Item) (*Item, error) {
+	db, err := GetDB()
+	if err != nil {
+		return nil, err
+	}
+	var updatedItem *Item
+	err = DoInTransaction(ctx, db, func() error {
+		queries := sqlc.New(db)
+		itemSqlc, sqlErr := queries.UpdateItem(ctx, sqlc.UpdateItemParams{
+			ID:   0,
+			Name: item.Name,
+			Icon: item.Icon,
+		})
+		if sqlErr != nil {
+			return sqlErr
+		}
+		updatedItem = convertItem(&itemSqlc)
+		if item.Nutrition != nil {
+			updatedNutrition, nutUpdateErr := UpdateNutrition(ctx, item.Nutrition)
+			if nutUpdateErr != nil {
+				return nutUpdateErr
+			}
+			item.Nutrition = updatedNutrition
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return updatedItem, nil
+}
+
+func DeleteItem(ctx context.Context, id int64) error {
+	db, err := GetDB()
+	if err != nil {
+		return err
+	}
+	queries := sqlc.New(db)
+	if err = queries.DeleteItem(ctx, id); err != nil {
+		return err
+	}
+	return nil
 }
