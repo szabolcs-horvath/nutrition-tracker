@@ -3,8 +3,8 @@ package items
 import (
 	"encoding/json"
 	"net/http"
-	"shorvath/nutrition-tracker/helpers"
 	"shorvath/nutrition-tracker/repository"
+	"shorvath/nutrition-tracker/util"
 	"strconv"
 )
 
@@ -26,7 +26,7 @@ func listHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	if err = helpers.WriteJson(w, http.StatusOK, list); err != nil {
+	if err = util.WriteJson(w, http.StatusOK, list); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
@@ -44,7 +44,7 @@ func findByIdHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
-		if err = helpers.WriteJson(w, http.StatusOK, item); err != nil {
+		if err = util.WriteJson(w, http.StatusOK, item); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 	} else {
@@ -63,7 +63,7 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	if err = helpers.WriteJson(w, http.StatusCreated, item); err != nil {
+	if err = util.WriteJson(w, http.StatusCreated, item); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 }
@@ -79,7 +79,7 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	if err = helpers.WriteJson(w, http.StatusOK, item); err != nil {
+	if err = util.WriteJson(w, http.StatusOK, item); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 }
