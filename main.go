@@ -12,7 +12,7 @@ import (
 
 func main() {
 	if err := godotenv.Load(); err != nil {
-		slog.Error("Failed to load .env file!")
+		slog.Error("[main] Failed to load .env file!", "ERROR", err)
 		panic(1)
 	}
 
@@ -28,7 +28,8 @@ func main() {
 		Addr:    ":" + helpers.SafeGetEnv("PORT"),
 		Handler: middlewareStack(router),
 	}
-
-	slog.Info("Starting server on address " + server.Addr)
-	server.ListenAndServe()
+	slog.Info("[main] Starting server on address " + server.Addr)
+	if err := server.ListenAndServe(); err != nil {
+		slog.Error("[main] Failed to serve address "+server.Addr, "ERROR", err)
+	}
 }
