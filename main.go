@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/donseba/go-htmx"
 	"github.com/joho/godotenv"
 	"log/slog"
 	"net/http"
@@ -10,23 +11,31 @@ import (
 	"shorvath/nutrition-tracker/http_server/routes/api"
 )
 
+type App struct {
+	HTMX   *htmx.HTMX
+	Router *http.ServeMux
+}
+
 func main() {
 	if err := godotenv.Load(); err != nil {
 		slog.Error("[main] Failed to load .env file!", "ERROR", err)
 		panic(1)
 	}
 
-	router := http.NewServeMux()
-	routes.ServeRoute(router, api.Prefix, api.Routes())
+	app := &App{
+		HTMX:   htmx.New(),
+		Router: http.NewServeMux(),
+	}
+
+	routes.ServeRoute(app.Router, api.Prefix, api.Routes())
 
 	middlewareStack := middleware.CreateStack(
 		middleware.AddRequestId,
 		middleware.Log,
 	)
-
 	server := http.Server{
 		Addr:    ":" + helpers.SafeGetEnv("PORT"),
-		Handler: middlewareStack(router),
+		Handler: middlewareStack(app.Router),
 	}
 	slog.Info("[main] Starting server on address " + server.Addr)
 	if err := server.ListenAndServe(); err != nil {
