@@ -1,5 +1,6 @@
 SQLITE_DB_FILE ?= sqlite/nutrition-tracker.db
 SQLITE_MIGRATIONS_DIR ?= sqlite/migrations
+HTMX_VERSION ?= 2.0.3
 
 build: migrate-up
 	sqlc generate
@@ -18,3 +19,8 @@ endif
 
 migrate-up:
 	migrate -source file://$(SQLITE_MIGRATIONS_DIR) -database sqlite3://$(SQLITE_DB_FILE) up
+
+download-htmx:
+	cd ./static/vendor/htmx; \
+	curl -O https://unpkg.com/htmx.org@$(HTMX_VERSION)/dist/htmx.min.js; \
+	cd -; \
