@@ -11,7 +11,7 @@ const Prefix = "/v1"
 
 func Routes() map[string]*http.ServeMux {
 	return map[string]*http.ServeMux{
-		items.Prefix:      routes.SubRouteHandlers(items.Routes()),
-		nutritions.Prefix: routes.SubRouteHandlers(nutritions.Routes()),
+		items.Prefix:      routes.SubRouteHandlers(items.Handlers()),
+		nutritions.Prefix: routes.SubRouteHandlers(nutritions.Handlers()),
 	}
 }
