@@ -24,12 +24,12 @@ migrate-up:
 	migrate -source file://$(SQLITE_MIGRATIONS_DIR) -database sqlite3://$(SQLITE_DB_FILE) up
 
 download-htmx:
-	cd ./static/vendor/htmx; \
+	cd ./web/static/vendor/htmx; \
 	curl -O https://unpkg.com/htmx.org@$(HTMX_VERSION)/dist/htmx.min.js; \
 	cd -;
 
 download-bootstrap:
-	cd ./static/vendor/bootstrap; \
+	cd ./web/static/vendor/bootstrap; \
 	curl -O https://cdn.jsdelivr.net/npm/bootstrap@$(BOOTSTRAP_VERSION)/dist/css/bootstrap.min.css; \
 	curl -O https://cdn.jsdelivr.net/npm/bootstrap@$(BOOTSTRAP_VERSION)/dist/js/bootstrap.bundle.min.js; \
-	cd -; \
+	cd -;
