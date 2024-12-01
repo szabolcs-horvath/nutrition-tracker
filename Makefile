@@ -3,9 +3,11 @@ SQLITE_MIGRATIONS_DIR ?= sqlite/migrations
 HTMX_VERSION ?= 2.0.3
 BOOTSTRAP_VERSION ?= 5.3.3
 
-build: migrate-up
-	sqlc generate
+build: migrate-up sqlc
 	go build -o out/nutrition-tracker -mod=readonly
+
+sqlc:
+	sqlc generate
 
 clean:
 	rm -rf generated out vendor
@@ -24,7 +26,7 @@ migrate-up:
 download-htmx:
 	cd ./static/vendor/htmx; \
 	curl -O https://unpkg.com/htmx.org@$(HTMX_VERSION)/dist/htmx.min.js; \
-	cd -; \
+	cd -;
 
 download-bootstrap:
 	cd ./static/vendor/bootstrap; \
