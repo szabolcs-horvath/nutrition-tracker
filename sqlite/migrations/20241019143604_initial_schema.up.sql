@@ -14,6 +14,6 @@ CREATE TABLE IF NOT EXISTS items
 (
     id        INTEGER PRIMARY KEY AUTOINCREMENT,
     name      TEXT NOT NULL,
-    nutrition REFERENCES nutritions NOT NULL,
+    nutrition INTEGER REFERENCES nutritions NOT NULL,
     icon      BLOB
 );

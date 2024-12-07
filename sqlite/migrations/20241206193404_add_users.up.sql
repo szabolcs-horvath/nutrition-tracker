@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS users
 );
 
 ALTER TABLE nutritions
-    ADD COLUMN owner REFERENCES users;
+    ADD COLUMN owner INTEGER REFERENCES users;
 
 ALTER TABLE nutritions
     ADD COLUMN user_created BOOLEAN NOT NULL DEFAULT FALSE

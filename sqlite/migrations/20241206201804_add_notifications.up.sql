@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS notifications
 (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
-    owner      REFERENCES users NOT NULL,
+    owner      INTEGER REFERENCES users NOT NULL,
     time       TIME NOT NULL,
     delay      TIME,
     delay_date DATE,
