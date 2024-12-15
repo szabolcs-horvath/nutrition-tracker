@@ -14,11 +14,14 @@
           "out": "generated",
           "emit_pointers_for_null_types": true,
           "emit_empty_slices": true,
+          "emit_sql_as_comment": true,
           "rename": {
             "user": "User_sqlc",
             "item": "Item_sqlc",
             "nutrition": "Nutrition_sqlc",
-            "notification": "Notification_sqlc"
+            "notification": "Notification_sqlc",
+            "language": "Language_sqlc",
+            "portion": "Portion_sqlc"
           }
         }
       }

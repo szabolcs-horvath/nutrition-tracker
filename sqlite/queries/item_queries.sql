@@ -1,34 +1,64 @@
--- name: ListItemsWithNutritions :many
-SELECT sqlc.embed(items), sqlc.embed(nutritions)
-FROM items JOIN nutritions ON items.nutrition_id = nutritions.id;
+-- name: ListItems :many
+SELECT sqlc.embed(items), sqlc.embed(users), sqlc.embed(languages), sqlc.embed(portions)
+FROM items
+LEFT JOIN users ON items.owner_id = users.id
+JOIN languages ON items.language_id = languages.id
+JOIN portions ON items.default_portion_id = portions.id;
 
 -- name: FindItemById :one
-SELECT *
+SELECT sqlc.embed(items), sqlc.embed(items_users_view), sqlc.embed(languages), sqlc.embed(portions)
 FROM items
-WHERE id = ?
-LIMIT 1;
-
--- name: FindItemByIdWithNutrition :one
-SELECT sqlc.embed(items), sqlc.embed(nutritions)
-FROM items JOIN nutritions ON items.nutrition_id = nutritions.id
-where items.id = ?
+LEFT JOIN items_users_view ON items.owner_id = items_users_view.id
+JOIN languages ON items.language_id = languages.id
+JOIN portions ON items.default_portion_id = portions.id
+WHERE items.id = ?
 LIMIT 1;
 
 -- name: CreateItem :one
 INSERT INTO items(name,
-                  nutrition_id,
-                  icon)
-VALUES (?, ?, ?)
+                  icon,
+                  owner_id,
+                  language_id,
+                  liquid,
+                  default_portion_id,
+                  calories_per_100,
+                  fats_per_100,
+                  fats_saturated_per_100,
+                  carbs_per_100,
+                  carbs_sugar_per_100,
+                  carbs_slow_release_per_100,
+                  carbs_fast_release_per_100,
+                  proteins_per_100,
+                  salt_per_100)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 RETURNING *;
 
 -- name: UpdateItem :one
 UPDATE items
 SET name = ?,
-    nutrition_id = ?,
-    icon = ?
+    icon = ?,
+    owner_id = ?,
+    language_id = ?,
+    liquid = ?,
+    default_portion_id = ?,
+    calories_per_100 = ?,
+    fats_per_100 = ?,
+    fats_saturated_per_100 = ?,
+    carbs_per_100 = ?,
+    carbs_sugar_per_100 = ?,
+    carbs_slow_release_per_100 = ?,
+    carbs_fast_release_per_100 = ?,
+    proteins_per_100 = ?,
+    salt_per_100 = ?
 WHERE id = ?
 RETURNING *;
 
 -- name: DeleteItem :exec
 DELETE FROM items
 WHERE id = ?;
+
+-- name: GetOwnerIdByItemId :one
+SELECT owner_id
+FROM items
+WHERE id = ?
+LIMIT 1;

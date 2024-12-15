@@ -15,6 +15,10 @@ func SafeGetEnv(key string) string {
 	return os.Getenv(key)
 }
 
+func ReadJson(r *http.Request, target interface{}) error {
+	return json.NewDecoder(r.Body).Decode(target)
+}
+
 func WriteJson(w http.ResponseWriter, status int, data interface{}) error {
 	js, err := json.Marshal(data)
 	if err != nil {

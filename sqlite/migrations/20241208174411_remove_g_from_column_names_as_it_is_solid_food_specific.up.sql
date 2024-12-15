@@ -1,0 +1,9 @@
+ALTER TABLE items RENAME COLUMN calories_per_100g TO calories_per_100;
+ALTER TABLE items RENAME COLUMN fats_per_100g TO fats_per_100;
+ALTER TABLE items RENAME COLUMN fats_saturated_per_100g TO fats_saturated_per_100;
+ALTER TABLE items RENAME COLUMN carbs_per_100g TO carbs_per_100;
+ALTER TABLE items RENAME COLUMN carbs_sugar_per_100g TO carbs_sugar_per_100;
+ALTER TABLE items RENAME COLUMN carbs_slow_release_per_100g TO carbs_slow_release_per_100;
+ALTER TABLE items RENAME COLUMN carbs_fast_release_per_100g TO carbs_fast_release_per_100;
+ALTER TABLE items RENAME COLUMN proteins_per_100g TO proteins_per_100;
+ALTER TABLE items RENAME COLUMN salt_per_100g TO salt_per_100;

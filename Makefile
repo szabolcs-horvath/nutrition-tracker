@@ -10,7 +10,7 @@ sqlc:
 	sqlc generate
 
 clean:
-	rm -rf generated out vendor
+	rm -rf generated out
 
 create-migration:
 ifneq ($(MIGRATION_NAME),)

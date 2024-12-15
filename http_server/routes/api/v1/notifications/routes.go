@@ -6,7 +6,6 @@ const Prefix = "/notifications"
 
 func Handlers() map[string]http.HandlerFunc {
 	return map[string]http.HandlerFunc{
-		//"GET /":           listHandler,
 		//"GET /{id}":       findByIdHandler,
 		//"GET /owner/{id}": listByOwnerHandler,
 		//"POST /":          createHandler,

@@ -12,11 +12,12 @@ const Prefix = "/items"
 
 func Handlers() map[string]http.HandlerFunc {
 	return map[string]http.HandlerFunc{
-		"GET /":        listHandler,
-		"GET /{id}":    findByIdHandler,
-		"POST /":       createHandler,
-		"PUT /":        updateHandler,
-		"DELETE /{id}": deleteHandler,
+		"GET /":          listHandler,
+		"GET /{id}":      findByIdHandler,
+		"POST /":         createHandler,
+		"POST /multiple": createMultipleHandler,
+		"PUT /":          updateHandler,
+		"DELETE /{id}":   deleteHandler,
 	}
 }
 
@@ -39,7 +40,7 @@ func findByIdHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		item, err := repository.FindItemByIdWithNutrition(r.Context(), id)
+		item, err := repository.FindItemById(r.Context(), id)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
@@ -65,6 +66,22 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	if err = util.WriteJson(w, http.StatusCreated, item); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+}
+
+func createMultipleHandler(w http.ResponseWriter, r *http.Request) {
+	var requestItems []*repository.Item
+	if err := json.NewDecoder(r.Body).Decode(&requestItems); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	result, err := repository.CreateMultipleItems(r.Context(), requestItems)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if err = util.WriteJson(w, http.StatusOK, result); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
