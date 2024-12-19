@@ -11,13 +11,12 @@ on:
 
 jobs:
 
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Go
-      uses: actions/setup-go@v4
+    - uses: actions/setup-go@v4
       with:
         go-version: '1.23.1'
 
@@ -33,5 +32,12 @@ jobs:
     - name: Build
       run: make build
 
-    # - name: Test
-    #   run: go test -v ./...
+    - name: Generate test coverage
+      run: go test ./... -v -coverprofile=./cover.out -covermode=atomic -coverpkg=./...
+
+    - name: Check test coverage
+      uses: vladopajic/go-test-coverage@v2
+      with:
+        config: ./.github/.testcoverage.yml
+        git-token: ${{ github.ref_name == 'main' && secrets.GITHUB_TOKEN || '' }}
+        git-branch: badges

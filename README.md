@@ -1,3 +1,5 @@
+![coverage](https://raw.githubusercontent.com/szabolcs-horvath/nutrition-tracker/badges/.badges/main/coverage.svg)
+
 # Nutrition Tracker for Kinga
 This project's purpose is to help Kinga track and plan her diet.
 
