@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS portions_backup (
 );
 
 INSERT INTO portions_backup
-SELECT * FROM portions;
+SELECT id, name, owner_id, language_id, liquid, weigth_in_grams, volume_in_ml FROM portions;
 
 DROP TABLE IF EXISTS portions;
 

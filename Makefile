@@ -26,8 +26,33 @@ migrate-up:
 migrate-up-1:
 	migrate -source file://$(SQLITE_MIGRATIONS_DIR) -database sqlite3://$(SQLITE_DB_FILE) up 1
 
+migrate-up-file:
+ifneq ($(SPECIFIED_DB_FILE),)
+	migrate -source file://$(SQLITE_MIGRATIONS_DIR) -database sqlite3://$(SPECIFIED_DB_FILE) up
+else
+	@echo "SPECIFIED_DB_FILE needs to be specified. Usage: make migrate-up-file SPECIFIED_DB_FILE=<db_file>"
+	exit 1
+endif
+
+migrate-up-1-file:
+ifneq ($(SPECIFIED_DB_FILE),)
+	migrate -source file://$(SQLITE_MIGRATIONS_DIR) -database sqlite3://$(SPECIFIED_DB_FILE) up 1
+else
+	@echo "SPECIFIED_DB_FILE needs to be specified. Usage: make migrate-up-1-file SPECIFIED_DB_FILE=<db_file>"
+	exit 1
+endif
+
 migrate-down-1:
 	migrate -source file://$(SQLITE_MIGRATIONS_DIR) -database sqlite3://$(SQLITE_DB_FILE) down 1
+
+migrate-down-1-file:
+ifneq ($(SPECIFIED_DB_FILE),)
+	migrate -source file://$(SQLITE_MIGRATIONS_DIR) -database sqlite3://$(SPECIFIED_DB_FILE) down 1
+else
+	@echo "SPECIFIED_DB_FILE needs to be specified. Usage: make migrate-down-1-file SPECIFIED_DB_FILE=<db_file>"
+	exit 1
+endif
+
 
 download-htmx:
 	cd ./web/static/vendor/htmx; \

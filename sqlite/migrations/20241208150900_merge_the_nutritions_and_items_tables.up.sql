@@ -31,8 +31,8 @@ SET calories_per_100g = (SELECT calories_per_100g FROM nutritions WHERE items.nu
 WHERE EXISTS (SELECT 1 FROM nutritions WHERE items.nutrition_id = nutritions.id);
 
 
-DROP TABLE IF EXISTS nutritions;
-
-ALTER TABLE items DROP COLUMN nutrition_id;
 ALTER TABLE items DROP COLUMN original_nutrition_id;
+ALTER TABLE items DROP COLUMN nutrition_id;
+
+DROP TABLE IF EXISTS nutritions;
 
