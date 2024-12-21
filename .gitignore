@@ -32,7 +32,7 @@ go.work.sum
 # out
 out/
 
-# .db file
+# .db files
 *.db
 
 # generated files

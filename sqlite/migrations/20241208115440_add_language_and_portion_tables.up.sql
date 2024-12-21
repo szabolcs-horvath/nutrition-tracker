@@ -4,11 +4,6 @@ CREATE TABLE IF NOT EXISTS languages (
     native_name TEXT NOT NULL
 );
 
---Default languages
-INSERT INTO languages(id, name, native_name)
-VALUES (1, 'en', 'English'),
-       (2, 'hu', 'magyar');
-
 ALTER TABLE users
     ADD COLUMN language_id INTEGER REFERENCES languages NOT NULL DEFAULT 1;
 
@@ -24,11 +19,6 @@ CREATE TABLE IF NOT EXISTS portions (
     language_id     INTEGER REFERENCES languages
         CHECK ( user_created = 0 OR language_id IS NOT NULL )
 );
-
---Default portions
-INSERT INTO portions(id, name, weigth_in_grams, volume_in_ml, owner_id, user_created, language_id)
-VALUES (1, 'g', 1, NULL, NULL, FALSE, NULL),
-       (2, 'ml', NULL, 1, NULL, FALSE, NULL);
 
 ALTER TABLE items
     ADD COLUMN language_id INTEGER REFERENCES languages NOT NULL DEFAULT 1;

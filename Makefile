@@ -1,4 +1,5 @@
 SQLITE_DB_FILE ?= sqlite/nutrition-tracker.db
+IT_SQLITE_DB_FILE ?= sqlite/nutrition-tracker-test.db
 SQLITE_MIGRATIONS_DIR ?= sqlite/migrations
 SQLC_VERSION ?= v1.27.0
 GOLANG_MIGRATE_VERSION ?= v4.18.1
@@ -27,12 +28,17 @@ unit-test: sqlc
 	mkdir -p $(GOCOVERDIR)
 	go test ./... -v -coverprofile=$(GOCOVERDIR)/unit-coverage.out -covermode=atomic -coverpkg=./...
 
-integration-test: sqlc
+integration-test: sqlc init-test-db
 	rm -rf $(GOCOVERDIR)/it-coverage
 	mkdir -p $(GOCOVERDIR)/it-coverage
 	go build -o out/nutrition-tracker-integration-test -mod=readonly -covermode=atomic
 	integration-test/integration-test.sh out/nutrition-tracker-integration-test $(GOCOVERDIR)/it-coverage
 	go tool covdata textfmt -i=$(GOCOVERDIR)/it-coverage -o=$(GOCOVERDIR)/it-coverage.out
+
+init-test-db:
+	rm -f $(IT_SQLITE_DB_FILE)
+	make migrate-up-file SPECIFIED_DB_FILE=$(IT_SQLITE_DB_FILE)
+	sqlite3 $(IT_SQLITE_DB_FILE) < sqlite/seed_test.sql
 
 coverage: unit-test integration-test
 	go run ./.github/merge-coverprofiles.go $(GOCOVERDIR)/merged-coverage.out $(GOCOVERDIR)/unit-coverage.out $(GOCOVERDIR)/it-coverage.out
