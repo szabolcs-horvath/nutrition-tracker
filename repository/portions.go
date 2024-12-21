@@ -15,6 +15,14 @@ type Portion struct {
 	VolumeInMls   *float64
 }
 
+func (p Portion) getMultiplier() float64 {
+	if p.Liquid {
+		return *p.VolumeInMls
+	} else {
+		return *p.WeightInGrams
+	}
+}
+
 func convertPortion(portion *sqlc.Portion_sqlc) *Portion {
 	return &Portion{
 		ID:            portion.ID,

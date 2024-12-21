@@ -21,7 +21,9 @@
             "nutrition": "Nutrition_sqlc",
             "notification": "Notification_sqlc",
             "language": "Language_sqlc",
-            "portion": "Portion_sqlc"
+            "portion": "Portion_sqlc",
+            "meal": "Meal_sqlc",
+            "meallog": "MealLog_sqlc",
           }
         }
       }
@@ -54,6 +56,22 @@
         },
         {
           "db_type": "TIME",
+          "nullable": false,
+          "engine": "sqlite",
+          "go_type": {
+            "type": "time.Time",
+          }
+        },
+        {
+          "db_type": "DATETIME",
+          "nullable": true,
+          "engine": "sqlite",
+          "go_type": {
+            "type": "*time.Time",
+          }
+        },
+        {
+          "db_type": "DATETIME",
           "nullable": false,
           "engine": "sqlite",
           "go_type": {
