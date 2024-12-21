@@ -13,17 +13,16 @@ This project's purpose is to help Kinga track and plan her diet.
 - :white_check_mark: go dependencies
   - :white_check_mark: [`sqlc`](https://docs.sqlc.dev/en/latest/overview/install.html)
   - :white_check_mark: [`golang-migrate`](https://github.com/golang-migrate/migrate/tree/master)
-  - Install them with:
+  - Install these with:
     ```shell
     make go-deps
     ```
 
 ### Set up
-1. #### Create the database
+1. #### Initialize the database
     ```shell
-    sqlite3 sqlite/nutrition-tracker.db
+    make init-db
     ```
-    You can exit from the interactive console with `.quit`
 
 2. #### Build the project
     ```shell
@@ -32,7 +31,21 @@ This project's purpose is to help Kinga track and plan her diet.
 
 ## Running
 ```shell
-out/nutrition-tracker
+out/nutrition-tracker <path-to-.env-file>
+```
+
+## Checking test coverage
+###### Both unit and integration tests
+```shell
+make coverage
+```
+###### Only unit tests
+```shell
+make unit-coverage
+```
+###### Only integration tests
+```shell
+make integration-coverage
 ```
 
 ## Adding a new migration

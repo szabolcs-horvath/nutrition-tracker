@@ -10,6 +10,9 @@ go-deps:
 	go install github.com/sqlc-dev/sqlc/cmd/sqlc@$(SQLC_VERSION)
 	go install -tags 'sqlite3' github.com/golang-migrate/migrate/v4/cmd/migrate@$(GOLANG_MIGRATE_VERSION)
 
+init-db: migrate-up
+	sqlite3 $(SQLITE_DB_FILE) < sqlite/seed.sql
+
 build: sqlc
 	go build -o out/nutrition-tracker -mod=readonly
 
