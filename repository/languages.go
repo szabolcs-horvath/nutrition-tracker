@@ -1,6 +1,6 @@
 package repository
 
-import sqlc "shorvath/nutrition-tracker/generated"
+import "github.com/szabolcs-horvath/nutrition-tracker/generated"
 
 type LanguageFromDB interface {
 	getId() *int64

@@ -1,9 +1,9 @@
 package portions
 
 import (
+	"github.com/szabolcs-horvath/nutrition-tracker/repository"
+	"github.com/szabolcs-horvath/nutrition-tracker/util"
 	"net/http"
-	"shorvath/nutrition-tracker/repository"
-	"shorvath/nutrition-tracker/util"
 	"strconv"
 )
 

@@ -20,6 +20,8 @@ go.work.sum
 
 # env file
 .env
+# except for the one used in GitHub Actions
+!.github/.env
 
 # General
 .DS_Store
@@ -38,3 +40,6 @@ out/
 
 # vendored files
 /vendor
+
+# coverage files
+/coverage

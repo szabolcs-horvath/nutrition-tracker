@@ -1,9 +1,16 @@
 SQLITE_DB_FILE ?= sqlite/nutrition-tracker.db
 SQLITE_MIGRATIONS_DIR ?= sqlite/migrations
+SQLC_VERSION ?= v1.27.0
+GOLANG_MIGRATE_VERSION ?= v4.18.1
 HTMX_VERSION ?= 2.0.3
 BOOTSTRAP_VERSION ?= 5.3.3
+GOCOVERDIR ?= coverage
 
-build: migrate-up sqlc
+go-deps:
+	go install github.com/sqlc-dev/sqlc/cmd/sqlc@$(SQLC_VERSION)
+	go install -tags 'sqlite3' github.com/golang-migrate/migrate/v4/cmd/migrate@$(GOLANG_MIGRATE_VERSION)
+
+build: sqlc
 	go build -o out/nutrition-tracker -mod=readonly
 
 sqlc:
@@ -11,6 +18,28 @@ sqlc:
 
 clean:
 	rm -rf generated out
+
+unit-test: sqlc
+	rm -f $(GOCOVERDIR)/unit-coverage.out
+	mkdir -p $(GOCOVERDIR)
+	go test ./... -v -coverprofile=$(GOCOVERDIR)/unit-coverage.out -covermode=atomic -coverpkg=./...
+
+integration-test: sqlc
+	rm -rf $(GOCOVERDIR)/it-coverage
+	mkdir -p $(GOCOVERDIR)/it-coverage
+	go build -o out/nutrition-tracker-integration-test -mod=readonly -covermode=atomic
+	integration-test/integration-test.sh out/nutrition-tracker-integration-test $(GOCOVERDIR)/it-coverage
+	go tool covdata textfmt -i=$(GOCOVERDIR)/it-coverage -o=$(GOCOVERDIR)/it-coverage.out
+
+coverage: unit-test integration-test
+	go run ./.github/merge-coverprofiles.go $(GOCOVERDIR)/merged-coverage.out $(GOCOVERDIR)/unit-coverage.out $(GOCOVERDIR)/it-coverage.out
+	go tool cover -html=$(GOCOVERDIR)/merged-coverage.out
+
+coverage-unit: unit-test
+	go tool cover -html=$(GOCOVERDIR)/unit-coverage.out
+
+coverage-it: integration-test
+	go tool cover -html=$(GOCOVERDIR)/it-coverage.out
 
 create-migration:
 ifneq ($(MIGRATION_NAME),)

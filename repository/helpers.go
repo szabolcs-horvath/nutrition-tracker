@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
-	sqlc "shorvath/nutrition-tracker/generated"
+	"github.com/szabolcs-horvath/nutrition-tracker/generated"
 )
 
 func GetQueries() (*sqlc.Queries, error) {

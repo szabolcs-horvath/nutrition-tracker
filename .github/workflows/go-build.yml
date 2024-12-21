@@ -1,16 +1,10 @@
-# This workflow will build a golang project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
-
-name: Go
-
+name: Build and Test
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-
 jobs:
-
   build-and-test:
     runs-on: ubuntu-latest
     steps:
@@ -23,17 +17,17 @@ jobs:
     - name: Install sqlite3
       run: sudo apt-get install sqlite3
 
-    - name: Install sqlc
-      run: go install github.com/sqlc-dev/sqlc/cmd/sqlc@v1.27.0
-
-    - name: Install golang-migrate with the sqlite3 driver
-      run: go install -tags 'sqlite3' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+    - name: Install go dependencies
+      run: make go-deps
 
     - name: Build
       run: make build
 
-    - name: Generate test coverage
-      run: go test ./... -v -coverprofile=./cover.out -covermode=atomic -coverpkg=./...
+    - name: Generate test coverage from unit tests
+      run: make unit-test
+
+    - name: Generate test coverage from integration tests
+      run: make integration-test
 
     - name: Check test coverage
       uses: vladopajic/go-test-coverage@v2

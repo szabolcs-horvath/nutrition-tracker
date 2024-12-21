@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	sqlc "shorvath/nutrition-tracker/generated"
+	"github.com/szabolcs-horvath/nutrition-tracker/generated"
 )
 
 type Portion struct {

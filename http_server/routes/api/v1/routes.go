@@ -1,12 +1,12 @@
 package v1
 
 import (
+	"github.com/szabolcs-horvath/nutrition-tracker/http_server/routes"
+	"github.com/szabolcs-horvath/nutrition-tracker/http_server/routes/api/v1/items"
+	"github.com/szabolcs-horvath/nutrition-tracker/http_server/routes/api/v1/notifications"
+	"github.com/szabolcs-horvath/nutrition-tracker/http_server/routes/api/v1/portions"
+	"github.com/szabolcs-horvath/nutrition-tracker/http_server/routes/api/v1/users"
 	"net/http"
-	"shorvath/nutrition-tracker/http_server/routes"
-	"shorvath/nutrition-tracker/http_server/routes/api/v1/items"
-	"shorvath/nutrition-tracker/http_server/routes/api/v1/notifications"
-	"shorvath/nutrition-tracker/http_server/routes/api/v1/portions"
-	"shorvath/nutrition-tracker/http_server/routes/api/v1/users"
 )
 
 const Prefix = "/v1"
