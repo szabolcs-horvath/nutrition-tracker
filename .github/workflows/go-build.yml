@@ -18,7 +18,7 @@ jobs:
       run: sudo apt-get install sqlite3
 
     - name: Install go dependencies
-      run: make go-deps
+      run: make install-go-deps
 
     - name: Build
       run: make build

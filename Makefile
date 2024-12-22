@@ -6,10 +6,11 @@ GOLANG_MIGRATE_VERSION ?= v4.18.1
 HTMX_VERSION ?= 2.0.3
 BOOTSTRAP_VERSION ?= 5.3.3
 GOCOVERDIR ?= coverage
+CGO_ENABLED=1 # Required for sqlite3 driver
 
-go-deps:
-	go install github.com/sqlc-dev/sqlc/cmd/sqlc@$(SQLC_VERSION)
-	go install -tags 'sqlite3' github.com/golang-migrate/migrate/v4/cmd/migrate@$(GOLANG_MIGRATE_VERSION)
+install-go-deps:
+	go install -v github.com/sqlc-dev/sqlc/cmd/sqlc@$(SQLC_VERSION)
+	go install -v -tags 'sqlite3' github.com/golang-migrate/migrate/v4/cmd/migrate@$(GOLANG_MIGRATE_VERSION)
 
 init-db: migrate-up
 	sqlite3 $(SQLITE_DB_FILE) < sqlite/seed.sql

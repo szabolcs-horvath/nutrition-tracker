@@ -1,7 +1,7 @@
 -- name: ListItems :many
-SELECT sqlc.embed(items), sqlc.embed(users), sqlc.embed(languages), sqlc.embed(portions)
+SELECT sqlc.embed(items), sqlc.embed(items_users_view), sqlc.embed(languages), sqlc.embed(portions)
 FROM items
-LEFT JOIN users ON items.owner_id = users.id
+LEFT JOIN items_users_view ON items.owner_id = items_users_view.id
 JOIN languages ON items.language_id = languages.id
 JOIN portions ON items.default_portion_id = portions.id;
 

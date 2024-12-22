@@ -56,8 +56,8 @@ func ListItems(ctx context.Context) ([]*Item, error) {
 	result := make([]*Item, len(list))
 	for i, n := range list {
 		result[i] = convertItem(&n.ItemSqlc)
-		if &n.UserSqlc != nil {
-			result[i].Owner = convertUser(UserSqlcWrapper{n.UserSqlc})
+		if &n.ItemsUsersView != nil {
+			result[i].Owner = convertUser(ItemsUsersViewWrapper{n.ItemsUsersView})
 		}
 		result[i].Language = convertLanguage(LanguageSqlcWrapper{n.LanguageSqlc})
 		result[i].DefaultPortion = convertPortion(&n.PortionSqlc)
