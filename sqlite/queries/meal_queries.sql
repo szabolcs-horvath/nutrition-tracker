@@ -1,5 +1,5 @@
 -- name: FindNonArchivedMealsForUser :many
-SELECT sqlc.embed(meals), sqlc.embed(users), sqlc.embed(meals_notifications_view)
+SELECT DISTINCT sqlc.embed(meals), sqlc.embed(users), sqlc.embed(meals_notifications_view)
 FROM meals
 JOIN users ON meals.owner_id = users.id
 LEFT JOIN meals_notifications_view ON meals.notification_id = meals_notifications_view.id

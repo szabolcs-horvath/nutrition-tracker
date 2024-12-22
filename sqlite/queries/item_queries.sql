@@ -1,12 +1,12 @@
 -- name: ListItems :many
-SELECT sqlc.embed(items), sqlc.embed(items_users_view), sqlc.embed(languages), sqlc.embed(portions)
+SELECT DISTINCT sqlc.embed(items), sqlc.embed(items_users_view), sqlc.embed(languages), sqlc.embed(portions)
 FROM items
 LEFT JOIN items_users_view ON items.owner_id = items_users_view.id
 JOIN languages ON items.language_id = languages.id
 JOIN portions ON items.default_portion_id = portions.id;
 
 -- name: FindItemById :one
-SELECT sqlc.embed(items), sqlc.embed(items_users_view), sqlc.embed(languages), sqlc.embed(portions)
+SELECT DISTINCT sqlc.embed(items), sqlc.embed(items_users_view), sqlc.embed(languages), sqlc.embed(portions)
 FROM items
 LEFT JOIN items_users_view ON items.owner_id = items_users_view.id
 JOIN languages ON items.language_id = languages.id

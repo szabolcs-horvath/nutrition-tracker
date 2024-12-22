@@ -14,7 +14,7 @@ WHERE items.id = sqlc.arg(item_id)
 AND portions.owner_id IS NULL;
 
 -- name: FindPortionById :one
-SELECT sqlc.embed(portions), sqlc.embed(portions_users_view), sqlc.embed(portions_languages_view)
+SELECT DISTINCT sqlc.embed(portions), sqlc.embed(portions_users_view), sqlc.embed(portions_languages_view)
 FROM portions
 LEFT JOIN portions_users_view ON portions.owner_id = portions_users_view.id
 LEFT JOIN portions_languages_view ON portions.language_id = portions_languages_view.id
