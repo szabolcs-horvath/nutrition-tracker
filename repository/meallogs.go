@@ -83,6 +83,25 @@ func convertMealLog(mealLog *sqlc.MealLog_sqlc) *MealLog {
 	}
 }
 
+func FindMealLogsForUserAndDate(ctx context.Context, ownerId int64) ([]*MealLog, error) {
+	queries, err := GetQueries()
+	if err != nil {
+		return nil, err
+	}
+	list, err := queries.FindMealLogsForUserAndDate(ctx, ownerId)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*MealLog, len(list))
+	for i, m := range list {
+		result[i] = convertMealLog(&m.MealLogSqlc)
+		result[i].Meal = convertMeal(&m.MealSqlc)
+		result[i].Item = convertItem(&m.ItemSqlc)
+		result[i].Portion = convertPortion(&m.PortionSqlc)
+	}
+	return result, nil
+}
+
 func CreateMealLog(ctx context.Context, mealLog *MealLog) (*MealLog, error) {
 	queries, err := GetQueries()
 	if err != nil {

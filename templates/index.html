@@ -1,14 +1,70 @@
+{{ block "index" . }}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <title>Nutrition Tracker</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="../web/static/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
-    <script src="../web/static/vendor/bootstrap/bootstrap.min.js"></script>
-    <script src="../web/static/vendor/htmx/htmx.min.js"></script>
+    <link href="/static/bootstrap/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-<h1>Hello World!</h1>
+<div class="container-sm">
+    <form hx-swap="outerHTML" hx-post="api/v1/meallogs/" hx-ext="json-enc">
+        mealId: <input type="number" name="Meal" required>
+        itemId: <input type="number" name="Item" required>
+        portionId: <input type="number" name="Portion" required>
+        count: <input type="number" name="PortionMultiplier" required>
+        dateTime: <input type="datetime-local" name="DateTime" required>
+        <button type="submit">Add</button>
+    </form>
+    <hr/>
+    {{ template "meallogs" .MealLogs }}
+    <hr/>
+    {{ template "items" .Items }}
+</div>
+<script src="/static/bootstrap/bootstrap.bundle.min.js"></script>
+<script src="/static/htmx/htmx.min.js"></script>
+<script src="/static/htmx/extensions/json-enc.js"></script>
 </body>
 </html>
+{{ end }}
+
+{{ block "meallogs" . }}
+<ol>
+    {{ range . }}
+    <li>
+        <span>{{ .DateTime }}</span>
+        <span>Calories: {{ .GetCalories }}</span>
+    </li>
+    {{ end }}
+</ol>
+{{ end }}
+
+{{ block "items" . }}
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Name</th>
+        <th scope="col">Liquid</th>
+        <th scope="col">Calories</th>
+        <th scope="col">Fats</th>
+        <th scope="col">Carbs</th>
+        <th scope="col">Proteins</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{ range . }}
+    <tr>
+        <td>{{ .ID }}</td>
+        <td>{{ .Name }}</td>
+        <td>{{ .Liquid }}</td>
+        <td>{{ .CaloriesPer100 }}</td>
+        <td>{{ .FatsPer100 }}</td>
+        <td>{{ .CarbsPer100 }}</td>
+        <td>{{ .ProteinsPer100 }}</td>
+    </tr>
+    {{ end }}
+    </tbody>
+</table>
+{{ end }}

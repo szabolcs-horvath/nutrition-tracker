@@ -3,14 +3,11 @@ module github.com/szabolcs-horvath/nutrition-tracker
 go 1.23.1
 
 require (
+	github.com/auth0/go-jwt-middleware/v2 v2.2.2
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/mattn/go-sqlite3 v1.14.24
 )
-
-require github.com/donseba/go-htmx v1.12.0
-
-require github.com/auth0/go-jwt-middleware/v2 v2.2.2
 
 require (
 	golang.org/x/crypto v0.31.0 // indirect

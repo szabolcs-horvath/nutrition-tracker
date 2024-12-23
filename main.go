@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
-	"github.com/donseba/go-htmx"
 	"github.com/joho/godotenv"
 	"github.com/szabolcs-horvath/nutrition-tracker/http_server/middleware"
 	"github.com/szabolcs-horvath/nutrition-tracker/http_server/routes"
 	"github.com/szabolcs-horvath/nutrition-tracker/http_server/routes/api"
+	"github.com/szabolcs-horvath/nutrition-tracker/repository"
 	"github.com/szabolcs-horvath/nutrition-tracker/util"
+	"html/template"
+	"io"
 	"log/slog"
 	"net/http"
 	"os"
@@ -16,9 +18,42 @@ import (
 	"time"
 )
 
+type Templates struct {
+	templates *template.Template
+}
+
 type App struct {
-	HTMX   *htmx.HTMX
-	Router *http.ServeMux
+	Router    *http.ServeMux
+	Templates *Templates
+}
+
+func (app App) Render(w io.Writer, name string, data interface{}) error {
+	return app.Templates.templates.ExecuteTemplate(w, name, data)
+}
+
+func newApp() *App {
+	return &App{
+		Router: http.NewServeMux(),
+		Templates: &Templates{
+			templates: template.Must(template.ParseGlob("templates/*.html")),
+		},
+	}
+}
+
+func getEnvFile() string {
+	envFile := ".env"
+	if len(os.Args[1:]) > 0 {
+		if os.Args[1] != "" {
+			envFile = os.Args[1]
+		}
+	}
+	slog.Info("[getEnvFile] Using .env file: " + envFile)
+	return envFile
+}
+
+type IndexData struct {
+	MealLogs []*repository.MealLog
+	Items    []*repository.Item
 }
 
 func main() {
@@ -28,21 +63,31 @@ func main() {
 		panic(1)
 	}
 
-	app := &App{
-		HTMX:   htmx.New(),
-		Router: http.NewServeMux(),
-	}
-
+	app := newApp()
 	routes.ServeRoute(app.Router, api.Prefix, api.Routes())
 
+	fs := http.FileServer(http.Dir("web/static/vendor"))
+	app.Router.Handle("/static/", http.StripPrefix("/static/", fs))
+
 	app.Router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		h := app.HTMX.NewHandler(w, r)
-
-		page := htmx.NewComponent("templates/index.html")
-
-		_, err := h.Render(r.Context(), page)
+		mealLogs, err := repository.FindMealLogsForUserAndDate(r.Context(), 1)
 		if err != nil {
-			slog.ErrorContext(r.Context(), "Error rendering index.html")
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		items, err := repository.ListItems(r.Context())
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		data := IndexData{
+			MealLogs: mealLogs,
+			Items:    items,
+		}
+		err = app.Render(w, "index", data)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 	})
 
@@ -60,7 +105,7 @@ func main() {
 	go func() {
 		slog.Info("[main] Starting server on address " + server.Addr)
 		if err := server.ListenAndServe(); err != nil {
-			slog.Error("[main] Failed to serve address "+server.Addr, "ERROR", err)
+			slog.Info("[main] Stopped serving address "+server.Addr, "ERROR", err)
 		}
 		slog.Info("[main] Stopped serving new connections on address " + server.Addr)
 	}()
@@ -74,15 +119,4 @@ func main() {
 		slog.Error("[main] HTTP shutdown error!", "ERROR", err)
 	}
 	slog.Info("[main] Graceful shutdown complete.")
-}
-
-func getEnvFile() string {
-	envFile := ".env"
-	if len(os.Args[1:]) > 0 {
-		if os.Args[1] != "" {
-			envFile = os.Args[1]
-		}
-	}
-	slog.Info("[getEnvFile] Using .env file: " + envFile)
-	return envFile
 }
