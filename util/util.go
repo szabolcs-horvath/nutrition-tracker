@@ -2,9 +2,14 @@ package util
 
 import (
 	"encoding/json"
+	"fmt"
+	"html/template"
 	"log/slog"
+	"math"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
 )
 
 func SafeGetEnv(key string) string {
@@ -31,4 +36,24 @@ func WriteJson(w http.ResponseWriter, status int, data interface{}) error {
 		return err
 	}
 	return nil
+}
+
+func TemplateFuncs() template.FuncMap {
+	return template.FuncMap{
+		"formatFloat": func(value float64, precision int) string {
+			p := math.Pow(10, float64(precision))
+			rounded := math.Round(value*p) / p
+
+			formatted := fmt.Sprintf("%."+strconv.Itoa(precision)+"f", rounded)
+
+			if strings.Contains(formatted, ".") {
+				formatted = strings.TrimRight(formatted, "0")
+				if formatted[len(formatted)-1] == '.' {
+					formatted = formatted[:len(formatted)-1]
+				}
+			}
+
+			return formatted
+		},
+	}
 }

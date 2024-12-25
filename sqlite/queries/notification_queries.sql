@@ -7,19 +7,17 @@ WHERE notifications.owner_id = ?;
 -- name: CreateNotification :one
 INSERT INTO notifications(owner_id,
                           time,
-                          delay,
-                          delay_date,
-                          name)
-VALUES (?, ?, ?, ?, ?)
+                          delay_seconds,
+                          delay_date)
+VALUES (?, ?, ?, ?)
 RETURNING *;
 
 -- name: UpdateNotification :one
 UPDATE notifications
 SET owner_id = ?,
     time = ?,
-    delay = ?,
-    delay_date = ?,
-    name = ?
+    delay_seconds = ?,
+    delay_date = ?
 WHERE id = ?
 RETURNING *;
 

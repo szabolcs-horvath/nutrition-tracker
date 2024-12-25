@@ -5,8 +5,27 @@ htmx.defineExtension('json-enc', {
         }
     },
 
-    encodeParameters : function(xhr, parameters, elt) {
+    encodeParameters: function (xhr, parameters, elt) {
         xhr.overrideMimeType('text/json');
-        return (JSON.stringify(parameters));
+
+        const transformValue = (value, inputElement) => {
+            if (inputElement && inputElement.type === "number") {
+                return Number(value);
+            }
+            if (inputElement && inputElement.type === "datetime-local" && typeof value === "string" && value.includes("T")) {
+                // Ensure datetime is in the correct format (e.g., add :00Z if needed)
+                return value.endsWith("Z") ? value : value + ":00Z";
+            }
+            return value;
+        };
+
+        const transformedParameters = Object.fromEntries(
+            Object.entries(parameters).map(([key, value]) => {
+                const inputElement = elt.querySelector(`[name="${key}"]`);
+                return [key, transformValue(value, inputElement)];
+            })
+        );
+
+        return JSON.stringify(transformedParameters);
     }
 });

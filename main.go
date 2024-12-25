@@ -35,7 +35,7 @@ func newApp() *App {
 	return &App{
 		Router: http.NewServeMux(),
 		Templates: &Templates{
-			templates: template.Must(template.ParseGlob("templates/*.html")),
+			templates: template.Must(template.New("templates").Funcs(util.TemplateFuncs()).ParseGlob("templates/*.html")),
 		},
 	}
 }
@@ -105,7 +105,7 @@ func main() {
 	go func() {
 		slog.Info("[main] Starting server on address " + server.Addr)
 		if err := server.ListenAndServe(); err != nil {
-			slog.Info("[main] Stopped serving address "+server.Addr, "ERROR", err)
+			slog.Info("[main] Stopped serving address "+server.Addr, "err", err)
 		}
 		slog.Info("[main] Stopped serving new connections on address " + server.Addr)
 	}()

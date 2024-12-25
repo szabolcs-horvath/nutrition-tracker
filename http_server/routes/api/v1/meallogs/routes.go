@@ -18,8 +18,8 @@ func Handlers() map[string]http.HandlerFunc {
 }
 
 func createHandler(w http.ResponseWriter, r *http.Request) {
-	var requestItem *repository.MealLog
-	if err := json.NewDecoder(r.Body).Decode(requestItem); err != nil {
+	var requestItem repository.CreateMealLogRequest
+	if err := json.NewDecoder(r.Body).Decode(&requestItem); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

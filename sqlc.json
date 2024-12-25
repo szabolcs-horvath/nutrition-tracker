@@ -51,7 +51,9 @@
           "nullable": true,
           "engine": "sqlite",
           "go_type": {
-            "type": "*time.Time",
+            "import": "github.com/szabolcs-horvath/nutrition-tracker/custom_types",
+            "type": "Time",
+            "pointer": true
           }
         },
         {
@@ -59,7 +61,29 @@
           "nullable": false,
           "engine": "sqlite",
           "go_type": {
-            "type": "time.Time",
+            "import": "github.com/szabolcs-horvath/nutrition-tracker/custom_types",
+            "type": "Time",
+            "pointer": false
+          }
+        },
+        {
+          "db_type": "DATE",
+          "nullable": true,
+          "engine": "sqlite",
+          "go_type": {
+            "import": "github.com/szabolcs-horvath/nutrition-tracker/custom_types",
+            "type": "Date",
+            "pointer": true
+          }
+        },
+        {
+          "db_type": "DATE",
+          "nullable": false,
+          "engine": "sqlite",
+          "go_type": {
+            "import": "github.com/szabolcs-horvath/nutrition-tracker/custom_types",
+            "type": "Date",
+            "pointer": false
           }
         },
         {

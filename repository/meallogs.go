@@ -102,15 +102,23 @@ func FindMealLogsForUserAndDate(ctx context.Context, ownerId int64) ([]*MealLog,
 	return result, nil
 }
 
-func CreateMealLog(ctx context.Context, mealLog *MealLog) (*MealLog, error) {
+type CreateMealLogRequest struct {
+	MealID            int64     `json:"meal_id"`
+	ItemID            int64     `json:"item_id"`
+	PortionID         int64     `json:"portion_id"`
+	PortionMultiplier float64   `json:"portion_multiplier"`
+	DateTime          time.Time `json:"date_time"`
+}
+
+func CreateMealLog(ctx context.Context, mealLog CreateMealLogRequest) (*MealLog, error) {
 	queries, err := GetQueries()
 	if err != nil {
 		return nil, err
 	}
 	mealLogSqlc, err := queries.CreateMealLog(ctx, sqlc.CreateMealLogParams{
-		MealID:            mealLog.Meal.ID,
-		ItemID:            mealLog.Item.ID,
-		PortionID:         mealLog.Portion.ID,
+		MealID:            mealLog.MealID,
+		ItemID:            mealLog.ItemID,
+		PortionID:         mealLog.PortionID,
 		PortionMultiplier: mealLog.PortionMultiplier,
 		Datetime:          mealLog.DateTime,
 	})
@@ -120,18 +128,27 @@ func CreateMealLog(ctx context.Context, mealLog *MealLog) (*MealLog, error) {
 	return convertMealLog(&mealLogSqlc), nil
 }
 
-func UpdateMealLog(ctx context.Context, mealLog *MealLog) (*MealLog, error) {
+type UpdateMealLogRequest struct {
+	MealLogID         int64     `json:"id"`
+	MealID            int64     `json:"meal_id"`
+	ItemID            int64     `json:"item_id"`
+	PortionID         int64     `json:"portion_id"`
+	PortionMultiplier float64   `json:"portion_multiplier"`
+	DateTime          time.Time `json:"date_time"`
+}
+
+func UpdateMealLog(ctx context.Context, mealLog UpdateMealLogRequest) (*MealLog, error) {
 	queries, err := GetQueries()
 	if err != nil {
 		return nil, err
 	}
 	mealLogSqlc, err := queries.UpdateMealLog(ctx, sqlc.UpdateMealLogParams{
-		MealID:            mealLog.Meal.ID,
-		ItemID:            mealLog.Item.ID,
-		PortionID:         mealLog.Portion.ID,
+		MealID:            mealLog.MealID,
+		ItemID:            mealLog.ItemID,
+		PortionID:         mealLog.PortionID,
 		PortionMultiplier: mealLog.PortionMultiplier,
 		Datetime:          mealLog.DateTime,
-		ID:                mealLog.ID,
+		ID:                mealLog.MealLogID,
 	})
 	if err != nil {
 		return nil, err

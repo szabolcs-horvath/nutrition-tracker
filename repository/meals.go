@@ -2,8 +2,8 @@ package repository
 
 import (
 	"context"
+	"github.com/szabolcs-horvath/nutrition-tracker/custom_types"
 	sqlc "github.com/szabolcs-horvath/nutrition-tracker/generated"
-	"time"
 )
 
 type Meal struct {
@@ -11,7 +11,7 @@ type Meal struct {
 	Owner                 *User
 	Notification          *Notification
 	Name                  string
-	Time                  time.Time
+	Time                  custom_types.Time
 	CaloriesQuota         *float64
 	FatsQuota             *float64
 	FatsSaturatedQuota    *float64
@@ -68,11 +68,10 @@ func CreateMeal(ctx context.Context, meal *Meal) (*Meal, error) {
 	var result *Meal
 	err = DoInTransaction(ctx, db, func(queries *sqlc.Queries) error {
 		notificationSqlc, notiErr := queries.CreateNotification(ctx, sqlc.CreateNotificationParams{
-			OwnerID:   meal.Notification.Owner.ID,
-			Time:      meal.Notification.Time,
-			Delay:     meal.Notification.Delay,
-			DelayDate: meal.Notification.DelayDate,
-			Name:      meal.Notification.Name,
+			OwnerID:      meal.Notification.Owner.ID,
+			Time:         meal.Notification.Time,
+			DelaySeconds: nil,
+			DelayDate:    nil,
 		})
 		if notiErr != nil {
 			return notiErr

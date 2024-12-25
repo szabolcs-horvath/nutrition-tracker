@@ -2,17 +2,29 @@ package repository
 
 import (
 	"context"
+	"github.com/szabolcs-horvath/nutrition-tracker/custom_types"
 	sqlc "github.com/szabolcs-horvath/nutrition-tracker/generated"
 	"time"
 )
 
+type DurationWrapper struct {
+	Duration *time.Duration
+}
+
+func (duration DurationWrapper) Seconds() *int64 {
+	if duration.Duration != nil {
+		var seconds = int64(duration.Duration.Seconds())
+		return &seconds
+	}
+	return nil
+}
+
 type NotificationFromDB interface {
 	getId() *int64
 	getOwnerID() *int64
-	getTime() *time.Time
-	getDelay() *time.Time
-	getDelayDate() *time.Time
-	getName() *string
+	getTime() *custom_types.Time
+	getDelay() *time.Duration
+	getDelayDate() *custom_types.Date
 }
 
 type NotificationSqlcWrapper struct {
@@ -27,20 +39,20 @@ func (notification NotificationSqlcWrapper) getOwnerID() *int64 {
 	return &notification.OwnerID
 }
 
-func (notification NotificationSqlcWrapper) getTime() *time.Time {
+func (notification NotificationSqlcWrapper) getTime() *custom_types.Time {
 	return &notification.Time
 }
 
-func (notification NotificationSqlcWrapper) getDelay() *time.Time {
-	return notification.Delay
+func (notification NotificationSqlcWrapper) getDelay() *time.Duration {
+	if notification.DelaySeconds != nil {
+		duration := time.Duration(*notification.DelaySeconds) * time.Second
+		return &duration
+	}
+	return nil
 }
 
-func (notification NotificationSqlcWrapper) getDelayDate() *time.Time {
+func (notification NotificationSqlcWrapper) getDelayDate() *custom_types.Date {
 	return notification.DelayDate
-}
-
-func (notification NotificationSqlcWrapper) getName() *string {
-	return &notification.Name
 }
 
 type MealsNotificationsViewWrapper struct {
@@ -55,29 +67,28 @@ func (notification MealsNotificationsViewWrapper) getOwnerID() *int64 {
 	return notification.OwnerID
 }
 
-func (notification MealsNotificationsViewWrapper) getTime() *time.Time {
+func (notification MealsNotificationsViewWrapper) getTime() *custom_types.Time {
 	return notification.Time
 }
 
-func (notification MealsNotificationsViewWrapper) getDelay() *time.Time {
-	return notification.Delay
+func (notification MealsNotificationsViewWrapper) getDelay() *time.Duration {
+	if notification.DelaySeconds != nil {
+		duration := time.Duration(*notification.DelaySeconds) * time.Second
+		return &duration
+	}
+	return nil
 }
 
-func (notification MealsNotificationsViewWrapper) getDelayDate() *time.Time {
+func (notification MealsNotificationsViewWrapper) getDelayDate() *custom_types.Date {
 	return notification.DelayDate
-}
-
-func (notification MealsNotificationsViewWrapper) getName() *string {
-	return notification.Name
 }
 
 type Notification struct {
 	ID        int64
 	Owner     *User
-	Time      time.Time
-	Delay     *time.Time
-	DelayDate *time.Time
-	Name      string
+	Time      custom_types.Time
+	Delay     *time.Duration
+	DelayDate *custom_types.Date
 }
 
 func convertNotification(notification NotificationFromDB) *Notification {
@@ -89,7 +100,6 @@ func convertNotification(notification NotificationFromDB) *Notification {
 			Time:      *notification.getTime(),
 			Delay:     notification.getDelay(),
 			DelayDate: notification.getDelayDate(),
-			Name:      *notification.getName(),
 		}
 	}
 }
@@ -117,11 +127,10 @@ func CreateNotification(ctx context.Context, notification *Notification) (*Notif
 		return nil, err
 	}
 	notificationSqlc, err := queries.CreateNotification(ctx, sqlc.CreateNotificationParams{
-		OwnerID:   notification.Owner.ID,
-		Time:      notification.Time,
-		Delay:     notification.Delay,
-		DelayDate: notification.DelayDate,
-		Name:      notification.Name,
+		OwnerID:      notification.Owner.ID,
+		Time:         notification.Time,
+		DelaySeconds: DurationWrapper{Duration: notification.Delay}.Seconds(),
+		DelayDate:    notification.DelayDate,
 	})
 	if err != nil {
 		return nil, err
@@ -135,12 +144,11 @@ func UpdateNotification(ctx context.Context, notification *Notification) (*Notif
 		return nil, err
 	}
 	notificationSqlc, err := queries.UpdateNotification(ctx, sqlc.UpdateNotificationParams{
-		OwnerID:   notification.Owner.ID,
-		Time:      notification.Time,
-		Delay:     notification.Delay,
-		DelayDate: notification.DelayDate,
-		Name:      notification.Name,
-		ID:        notification.ID,
+		OwnerID:      notification.Owner.ID,
+		Time:         notification.Time,
+		DelaySeconds: DurationWrapper{Duration: notification.Delay}.Seconds(),
+		DelayDate:    notification.DelayDate,
+		ID:           notification.ID,
 	})
 	if err != nil {
 		return nil, err

@@ -1,11 +1,13 @@
 package middleware
 
 import (
+	"bytes"
 	"context"
 	"github.com/auth0/go-jwt-middleware/v2"
 	"github.com/auth0/go-jwt-middleware/v2/jwks"
 	"github.com/auth0/go-jwt-middleware/v2/validator"
 	"github.com/google/uuid"
+	"io"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -60,11 +62,14 @@ func AddRequestId(next http.Handler) http.Handler {
 
 func LogIncomingRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ := io.ReadAll(r.Body)
+		r.Body = io.NopCloser(bytes.NewReader(body))
 		requestId := findRequestId(r)
 		slog.InfoContext(r.Context(), "[LogIncomingRequest]",
 			"REQUEST_ID", requestId,
 			"METHOD", r.Method,
 			"PATH", r.URL.Path,
+			"BODY", body,
 		)
 		next.ServeHTTP(w, r)
 	})
