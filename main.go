@@ -68,7 +68,7 @@ func main() {
 	routes.ServeFS(app.Router, "/static", "web/static/vendor")
 
 	app.Router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		mealLogs, err := repository.FindMealLogsForUserAndDate(r.Context(), 1)
+		mealLogs, err := repository.FindMealLogsForUserAndCurrentDay(r.Context(), 1)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return

@@ -1,9 +1,19 @@
 BEGIN TRANSACTION;
 
+-- daily_quotas (including archived quotas)
+INSERT INTO daily_quotas(id, owner_id, archived_date_time, calories, fats, fats_saturated, carbs, carbs_sugar, carbs_slow_release, carbs_fast_release, proteins,
+                         salt)
+VALUES (1, 1, '2021-12-27 12:54:21', 2021, 70, 20, 260, 90, 150, 110, 50, 6),
+       (2, 2, '2021-12-27 12:54:21', 2021, 70, 20, 260, 90, 150, 110, 50, 6),
+       (3, 1, '2022-01-01 00:00:00', 2022, 70, 20, 260, 90, 150, 110, 50, 6),
+       (4, 2, '2022-01-01 00:00:00', 2022, 70, 20, 260, 90, 150, 110, 50, 6),
+       (5, 1, NULL, 2023, 70, 20, 260, 90, 150, 110, 50, 6),
+       (6, 2, NULL, 2023, 70, 20, 260, 90, 150, 110, 50, 6);
+
 -- users
-INSERT INTO users(id, language_id)
-VALUES (1, 1),
-       (2, 2);
+INSERT INTO users(id, language_id, daily_quota_id)
+VALUES (1, 1, 5),
+       (2, 2, 6);
 
 -- meals
 INSERT INTO meals(id, owner_id, notification_id, name, time, calories_quota, fats_quota, fats_saturated_quota, carbs_quota, carbs_sugar_quota,

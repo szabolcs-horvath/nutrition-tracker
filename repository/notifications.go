@@ -104,6 +104,20 @@ func convertNotification(notification NotificationFromDB) *Notification {
 	}
 }
 
+func FindNotificationById(ctx context.Context, id int64) (*Notification, error) {
+	queries, err := GetQueries()
+	if err != nil {
+		return nil, err
+	}
+	row, err := queries.FindNotificationById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	notification := convertNotification(NotificationSqlcWrapper{row.NotificationSqlc})
+	notification.Owner = convertUser(UserSqlcWrapper{row.UserSqlc})
+	return notification, nil
+}
+
 func ListNotificationsByUserId(ctx context.Context, ownerId int64) ([]*Notification, error) {
 	queries, err := GetQueries()
 	if err != nil {

@@ -9,24 +9,32 @@ import (
 
 const Prefix = "/portions"
 
-func Handlers() map[string]http.HandlerFunc {
+func HandlerFuncs() map[string]http.HandlerFunc {
 	return map[string]http.HandlerFunc{
-		"GET /item/{itemId}": listForItemHandler,
-		"GET /{id}":          findByIdHandler,
-		"POST /{$}":          createHandler,
-		"PUT /{$}":           updateHandler,
-		"DELETE /{id}":       deleteHandler,
+		"GET /item/{id}": listForItemHandler,
+		"GET /{id}":      findByIdHandler,
+		"POST /{$}":      createHandler,
+		"PUT /{$}":       updateHandler,
+		"DELETE /{id}":   deleteHandler,
 	}
 }
 
 func listForItemHandler(w http.ResponseWriter, r *http.Request) {
-	itemId, err := strconv.ParseInt(r.PathValue("itemId"), 10, 64)
+	itemId, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	ownerId, err := repository.GetOwnerIdByItemId(r.Context(), itemId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	list, err := repository.ListPortionsForItemAndUser(r.Context(), itemId, ownerId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	if err = util.WriteJson(w, http.StatusOK, list); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -50,7 +58,7 @@ func findByIdHandler(w http.ResponseWriter, r *http.Request) {
 
 func createHandler(w http.ResponseWriter, r *http.Request) {
 	var requestPortion repository.CreatePortionRequest
-	if err := util.ReadJson(r, requestPortion); err != nil {
+	if err := util.ReadJson(r, &requestPortion); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -66,7 +74,7 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 
 func updateHandler(w http.ResponseWriter, r *http.Request) {
 	var requestPortion repository.UpdatePortionRequest
-	if err := util.ReadJson(r, requestPortion); err != nil {
+	if err := util.ReadJson(r, &requestPortion); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

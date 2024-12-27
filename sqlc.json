@@ -24,6 +24,7 @@
             "portion": "Portion_sqlc",
             "meal": "Meal_sqlc",
             "meallog": "MealLog_sqlc",
+            "daily_quota": "DailyQuota_sqlc",
           }
         }
       }

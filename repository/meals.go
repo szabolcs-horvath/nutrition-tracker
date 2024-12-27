@@ -42,12 +42,30 @@ func convertMeal(meal *sqlc.Meal_sqlc) *Meal {
 	}
 }
 
-func FindNonArchivedMealsForUser(ctx context.Context, ownerId int64) ([]*Meal, error) {
+func FindMealById(ctx context.Context, id int64) (*Meal, error) {
 	queries, err := GetQueries()
 	if err != nil {
 		return nil, err
 	}
-	list, err := queries.FindNonArchivedMealsForUser(ctx, ownerId)
+	row, err := queries.FindMealById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	meal := convertMeal(&row.MealSqlc)
+	meal.Owner = convertUser(UserSqlcWrapper{row.UserSqlc})
+	meal.Notification = convertNotification(MealsNotificationsViewWrapper{row.MealsNotificationsView})
+	return meal, nil
+}
+
+func FindMealsForUser(ctx context.Context, ownerId int64, archived bool) ([]*Meal, error) {
+	queries, err := GetQueries()
+	if err != nil {
+		return nil, err
+	}
+	list, err := queries.FindMealsForUser(ctx, sqlc.FindMealsForUserParams{
+		OwnerID:  ownerId,
+		Archived: archived,
+	})
 	if err != nil {
 		return nil, err
 	}

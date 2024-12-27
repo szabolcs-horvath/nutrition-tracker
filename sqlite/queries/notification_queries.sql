@@ -1,3 +1,10 @@
+-- name: FindNotificationById :one
+SELECT sqlc.embed(notifications), sqlc.embed(users)
+FROM notifications
+JOIN users ON notifications.owner_id = users.id
+WHERE notifications.id = ?
+LIMIT 1;
+
 -- name: ListNotificationsByUserId :many
 SELECT sqlc.embed(notifications), sqlc.embed(users)
 FROM notifications

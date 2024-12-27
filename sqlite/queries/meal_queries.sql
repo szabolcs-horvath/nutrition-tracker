@@ -1,10 +1,18 @@
--- name: FindNonArchivedMealsForUser :many
+-- name: FindMealById :one
+SELECT DISTINCT sqlc.embed(meals), sqlc.embed(users), sqlc.embed(meals_notifications_view)
+FROM meals
+JOIN users ON meals.owner_id = users.id
+LEFT JOIN meals_notifications_view ON meals.notification_id = meals_notifications_view.id
+WHERE meals.id = ?
+LIMIT 1;
+
+-- name: FindMealsForUser :many
 SELECT DISTINCT sqlc.embed(meals), sqlc.embed(users), sqlc.embed(meals_notifications_view)
 FROM meals
 JOIN users ON meals.owner_id = users.id
 LEFT JOIN meals_notifications_view ON meals.notification_id = meals_notifications_view.id
 WHERE meals.owner_id = ?
-AND meals.archived = FALSE;
+AND meals.archived = ?;
 
 -- name: CreateMeal :one
 INSERT INTO meals(owner_id,

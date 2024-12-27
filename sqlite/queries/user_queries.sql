@@ -1,23 +1,26 @@
 -- name: ListUsers :many
-SELECT sqlc.embed(users), sqlc.embed(languages)
-FROM users
-JOIN languages ON users.language_id = languages.id;
-
--- name: FindUserById :one
-SELECT sqlc.embed(users), sqlc.embed(languages)
+SELECT DISTINCT sqlc.embed(users), sqlc.embed(languages), sqlc.embed(users_daily_quotas_view)
 FROM users
 JOIN languages ON users.language_id = languages.id
+LEFT JOIN users_daily_quotas_view ON users.daily_quota_id = users_daily_quotas_view.id;
+
+-- name: FindUserById :one
+SELECT DISTINCT sqlc.embed(users), sqlc.embed(languages), sqlc.embed(users_daily_quotas_view)
+FROM users
+JOIN languages ON users.language_id = languages.id
+LEFT JOIN users_daily_quotas_view ON users.daily_quota_id = users_daily_quotas_view.id
 WHERE users.id = ?
 LIMIT 1;
 
 -- name: CreateUser :one
-INSERT INTO users(language_id)
-VALUES (?)
+INSERT INTO users(language_id, daily_quota_id)
+VALUES (?, ?)
 RETURNING *;
 
 -- name: UpdateUser :one
 UPDATE users
-SET language_id = ?
+SET language_id = ?,
+    daily_quota_id = ?
 WHERE id = ?
 RETURNING *;
 

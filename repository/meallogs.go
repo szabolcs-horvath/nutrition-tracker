@@ -83,12 +83,53 @@ func convertMealLog(mealLog *sqlc.MealLog_sqlc) *MealLog {
 	}
 }
 
-func FindMealLogsForUserAndDate(ctx context.Context, ownerId int64) ([]*MealLog, error) {
+func FindMealLogById(ctx context.Context, id int64) (*MealLog, error) {
 	queries, err := GetQueries()
 	if err != nil {
 		return nil, err
 	}
-	list, err := queries.FindMealLogsForUserAndDate(ctx, ownerId)
+	row, err := queries.FindMealLogById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	mealLog := convertMealLog(&row.MealLogSqlc)
+	mealLog.Meal = convertMeal(&row.MealSqlc)
+	mealLog.Item = convertItem(&row.ItemSqlc)
+	mealLog.Portion = convertPortion(&row.PortionSqlc)
+	return mealLog, nil
+}
+
+func FindMealLogsForUserAndCurrentDay(ctx context.Context, ownerId int64) ([]*MealLog, error) {
+	queries, err := GetQueries()
+	if err != nil {
+		return nil, err
+	}
+	list, err := queries.FindMealLogsForUserAndDate(ctx, sqlc.FindMealLogsForUserAndDateParams{
+		OwnerID: ownerId,
+		Date:    time.Now(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*MealLog, len(list))
+	for i, m := range list {
+		result[i] = convertMealLog(&m.MealLogSqlc)
+		result[i].Meal = convertMeal(&m.MealSqlc)
+		result[i].Item = convertItem(&m.ItemSqlc)
+		result[i].Portion = convertPortion(&m.PortionSqlc)
+	}
+	return result, nil
+}
+
+func FindMealLogsForUserAndDate(ctx context.Context, ownerId int64, date time.Time) ([]*MealLog, error) {
+	queries, err := GetQueries()
+	if err != nil {
+		return nil, err
+	}
+	list, err := queries.FindMealLogsForUserAndDate(ctx, sqlc.FindMealLogsForUserAndDateParams{
+		OwnerID: ownerId,
+		Date:    date,
+	})
 	if err != nil {
 		return nil, err
 	}

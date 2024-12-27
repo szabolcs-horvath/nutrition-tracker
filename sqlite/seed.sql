@@ -1,3 +1,5 @@
+BEGIN TRANSACTION;
+
 -- languages
 INSERT INTO languages(name, native_name)
 VALUES ('en', 'English'),
@@ -13,3 +15,5 @@ VALUES ('g', NULL, NULL, FALSE, 1, NULL),
 
 -- items
 -- TODO
+
+COMMIT TRANSACTION;

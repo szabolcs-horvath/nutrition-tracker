@@ -9,7 +9,7 @@ import (
 
 const Prefix = "/items"
 
-func Handlers() map[string]http.HandlerFunc {
+func HandlerFuncs() map[string]http.HandlerFunc {
 	return map[string]http.HandlerFunc{
 		"GET /{$}":       listHandler,
 		"GET /{id}":      findByIdHandler,
@@ -70,7 +70,7 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 
 func createMultipleHandler(w http.ResponseWriter, r *http.Request) {
 	var requestItems []repository.CreateItemRequest
-	if err := util.ReadJson(r, requestItems); err != nil {
+	if err := util.ReadJson(r, &requestItems); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -86,7 +86,7 @@ func createMultipleHandler(w http.ResponseWriter, r *http.Request) {
 
 func updateHandler(w http.ResponseWriter, r *http.Request) {
 	var requestItem repository.UpdateItemRequest
-	if err := util.ReadJson(r, requestItem); err != nil {
+	if err := util.ReadJson(r, &requestItem); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
