@@ -121,15 +121,22 @@ func ListNotificationsByUserId(ctx context.Context, ownerId int64) ([]*Notificat
 	return result, nil
 }
 
-func CreateNotification(ctx context.Context, notification *Notification) (*Notification, error) {
+type CreateNotificationRequest struct {
+	OwnerID      int64              `json:"owner_id"`
+	Time         custom_types.Time  `json:"time"`
+	DelaySeconds *time.Duration     `json:"delay_seconds"`
+	DelayDate    *custom_types.Date `json:"delay_date"`
+}
+
+func CreateNotification(ctx context.Context, notification CreateNotificationRequest) (*Notification, error) {
 	queries, err := GetQueries()
 	if err != nil {
 		return nil, err
 	}
 	notificationSqlc, err := queries.CreateNotification(ctx, sqlc.CreateNotificationParams{
-		OwnerID:      notification.Owner.ID,
+		OwnerID:      notification.OwnerID,
 		Time:         notification.Time,
-		DelaySeconds: DurationWrapper{Duration: notification.Delay}.Seconds(),
+		DelaySeconds: DurationWrapper{Duration: notification.DelaySeconds}.Seconds(),
 		DelayDate:    notification.DelayDate,
 	})
 	if err != nil {
@@ -138,15 +145,23 @@ func CreateNotification(ctx context.Context, notification *Notification) (*Notif
 	return convertNotification(NotificationSqlcWrapper{notificationSqlc}), nil
 }
 
-func UpdateNotification(ctx context.Context, notification *Notification) (*Notification, error) {
+type UpdateNotificationRequest struct {
+	ID           int64              `json:"id"`
+	OwnerID      int64              `json:"owner_id"`
+	Time         custom_types.Time  `json:"time"`
+	DelaySeconds *time.Duration     `json:"delay_seconds"`
+	DelayDate    *custom_types.Date `json:"delay_date"`
+}
+
+func UpdateNotification(ctx context.Context, notification UpdateNotificationRequest) (*Notification, error) {
 	queries, err := GetQueries()
 	if err != nil {
 		return nil, err
 	}
 	notificationSqlc, err := queries.UpdateNotification(ctx, sqlc.UpdateNotificationParams{
-		OwnerID:      notification.Owner.ID,
+		OwnerID:      notification.OwnerID,
 		Time:         notification.Time,
-		DelaySeconds: DurationWrapper{Duration: notification.Delay}.Seconds(),
+		DelaySeconds: DurationWrapper{Duration: notification.DelaySeconds}.Seconds(),
 		DelayDate:    notification.DelayDate,
 		ID:           notification.ID,
 	})
@@ -156,12 +171,12 @@ func UpdateNotification(ctx context.Context, notification *Notification) (*Notif
 	return convertNotification(NotificationSqlcWrapper{notificationSqlc}), nil
 }
 
-func DeleteNotification(ctx context.Context, notificationId int64) error {
+func DeleteNotification(ctx context.Context, id int64) error {
 	queries, err := GetQueries()
 	if err != nil {
 		return err
 	}
-	if err = queries.DeleteNotification(ctx, notificationId); err != nil {
+	if err = queries.DeleteNotification(ctx, id); err != nil {
 		return err
 	}
 	return nil

@@ -38,10 +38,26 @@ func ListPortionsForItemAndUser(ctx context.Context, itemId int64, ownerId *int6
 	if err != nil {
 		return nil, err
 	}
-	list, err := queries.FindPortionsForItemAndUser(ctx, sqlc.FindPortionsForItemAndUserParams{
+	list, err := queries.ListPortionsForItemAndUser(ctx, sqlc.ListPortionsForItemAndUserParams{
 		ItemID:  itemId,
 		OwnerID: ownerId,
 	})
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*Portion, len(list))
+	for i, p := range list {
+		result[i] = convertPortion(&p.PortionSqlc)
+	}
+	return result, nil
+}
+
+func ListNonDefaultPortionsForItem(ctx context.Context, itemId int64) ([]*Portion, error) {
+	queries, err := GetQueries()
+	if err != nil {
+		return nil, err
+	}
+	list, err := queries.ListNonDefaultPortionsForItem(ctx, itemId)
 	if err != nil {
 		return nil, err
 	}
@@ -67,15 +83,24 @@ func FindPortionById(ctx context.Context, id int64) (*Portion, error) {
 	return portion, nil
 }
 
-func CreatePortion(ctx context.Context, portion *Portion) (*Portion, error) {
+type CreatePortionRequest struct {
+	Name          string   `json:"name"`
+	OwnerID       *int64   `json:"owner_id"`
+	LanguageID    *int64   `json:"language_id"`
+	Liquid        bool     `json:"liquid"`
+	WeightInGrams *float64 `json:"weight_in_grams"`
+	VolumeInMls   *float64 `json:"volume_in_mls"`
+}
+
+func CreatePortion(ctx context.Context, portion CreatePortionRequest) (*Portion, error) {
 	queries, err := GetQueries()
 	if err != nil {
 		return nil, err
 	}
 	portionSqlc, err := queries.CreatePortion(ctx, sqlc.CreatePortionParams{
 		Name:          portion.Name,
-		OwnerID:       &portion.Owner.ID,
-		LanguageID:    &portion.Language.ID,
+		OwnerID:       portion.OwnerID,
+		LanguageID:    portion.LanguageID,
 		Liquid:        portion.Liquid,
 		WeigthInGrams: portion.WeightInGrams,
 		VolumeInMl:    portion.VolumeInMls,
@@ -86,15 +111,25 @@ func CreatePortion(ctx context.Context, portion *Portion) (*Portion, error) {
 	return convertPortion(&portionSqlc), nil
 }
 
-func UpdatePortion(ctx context.Context, portion *Portion) (*Portion, error) {
+type UpdatePortionRequest struct {
+	ID            int64    `json:"id"`
+	Name          string   `json:"name"`
+	OwnerID       *int64   `json:"owner_id"`
+	LanguageID    *int64   `json:"language_id"`
+	Liquid        bool     `json:"liquid"`
+	WeightInGrams *float64 `json:"weight_in_grams"`
+	VolumeInMls   *float64 `json:"volume_in_mls"`
+}
+
+func UpdatePortion(ctx context.Context, portion UpdatePortionRequest) (*Portion, error) {
 	queries, err := GetQueries()
 	if err != nil {
 		return nil, err
 	}
 	portionSqlc, err := queries.UpdatePortion(ctx, sqlc.UpdatePortionParams{
 		Name:          portion.Name,
-		OwnerID:       &portion.Owner.ID,
-		LanguageID:    &portion.Language.ID,
+		OwnerID:       portion.OwnerID,
+		LanguageID:    portion.LanguageID,
 		Liquid:        portion.Liquid,
 		WeigthInGrams: portion.WeightInGrams,
 		VolumeInMl:    portion.VolumeInMls,

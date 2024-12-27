@@ -1,7 +1,6 @@
 package items
 
 import (
-	"encoding/json"
 	"github.com/szabolcs-horvath/nutrition-tracker/repository"
 	"github.com/szabolcs-horvath/nutrition-tracker/util"
 	"net/http"
@@ -12,11 +11,11 @@ const Prefix = "/items"
 
 func Handlers() map[string]http.HandlerFunc {
 	return map[string]http.HandlerFunc{
-		"GET /":          listHandler,
+		"GET /{$}":       listHandler,
 		"GET /{id}":      findByIdHandler,
-		"POST /":         createHandler,
+		"POST /{$}":      createHandler,
 		"POST /multiple": createMultipleHandler,
-		"PUT /":          updateHandler,
+		"PUT /{$}":       updateHandler,
 		"DELETE /{id}":   deleteHandler,
 	}
 }
@@ -54,8 +53,8 @@ func findByIdHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func createHandler(w http.ResponseWriter, r *http.Request) {
-	var requestItem *repository.Item
-	if err := json.NewDecoder(r.Body).Decode(requestItem); err != nil {
+	var requestItem repository.CreateItemRequest
+	if err := util.ReadJson(r, &requestItem); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -70,8 +69,8 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func createMultipleHandler(w http.ResponseWriter, r *http.Request) {
-	var requestItems []*repository.Item
-	if err := json.NewDecoder(r.Body).Decode(&requestItems); err != nil {
+	var requestItems []repository.CreateItemRequest
+	if err := util.ReadJson(r, requestItems); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -86,8 +85,8 @@ func createMultipleHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateHandler(w http.ResponseWriter, r *http.Request) {
-	var requestItem *repository.Item
-	if err := json.NewDecoder(r.Body).Decode(requestItem); err != nil {
+	var requestItem repository.UpdateItemRequest
+	if err := util.ReadJson(r, requestItem); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -102,20 +101,14 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteHandler(w http.ResponseWriter, r *http.Request) {
-	idParam := r.PathValue("id")
-	if idParam != "" {
-		id, err := strconv.ParseInt(idParam, 10, 64)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-		err = repository.DeleteItem(r.Context(), id)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		w.WriteHeader(http.StatusNoContent)
-	} else {
-		http.Error(w, "You need to specify the id of the item!", http.StatusBadRequest)
+	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
+	if err = repository.DeleteItem(r.Context(), id); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }

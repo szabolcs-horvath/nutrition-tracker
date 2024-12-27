@@ -13,8 +13,8 @@ func Handlers() map[string]http.HandlerFunc {
 	return map[string]http.HandlerFunc{
 		"GET /item/{itemId}": listForItemHandler,
 		"GET /{id}":          findByIdHandler,
-		"POST /":             createHandler,
-		"PUT /":              updateHandler,
+		"POST /{$}":          createHandler,
+		"PUT /{$}":           updateHandler,
 		"DELETE /{id}":       deleteHandler,
 	}
 }
@@ -49,7 +49,7 @@ func findByIdHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func createHandler(w http.ResponseWriter, r *http.Request) {
-	var requestPortion *repository.Portion
+	var requestPortion repository.CreatePortionRequest
 	if err := util.ReadJson(r, requestPortion); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -65,7 +65,7 @@ func createHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateHandler(w http.ResponseWriter, r *http.Request) {
-	var requestPortion *repository.Portion
+	var requestPortion repository.UpdatePortionRequest
 	if err := util.ReadJson(r, requestPortion); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -86,8 +86,7 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	err = repository.DeletePortion(r.Context(), id)
-	if err != nil {
+	if err = repository.DeletePortion(r.Context(), id); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

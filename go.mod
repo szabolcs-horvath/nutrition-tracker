@@ -4,6 +4,7 @@ go 1.23.1
 
 require (
 	github.com/auth0/go-jwt-middleware/v2 v2.2.2
+	github.com/deckarep/golang-set/v2 v2.7.0
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/mattn/go-sqlite3 v1.14.24

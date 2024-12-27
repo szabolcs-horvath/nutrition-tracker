@@ -60,25 +60,47 @@ func FindNonArchivedMealsForUser(ctx context.Context, ownerId int64) ([]*Meal, e
 	return result, nil
 }
 
-func CreateMeal(ctx context.Context, meal *Meal) (*Meal, error) {
+type CreateMealRequest struct {
+	OwnerID               int64             `json:"owner_id"`
+	CreateNotification    bool              `json:"create_notification"`
+	Name                  string            `json:"name"`
+	Time                  custom_types.Time `json:"time"`
+	CaloriesQuota         *float64          `json:"calories_quota"`
+	FatsQuota             *float64          `json:"fats_quota"`
+	FatsSaturatedQuota    *float64          `json:"fats_saturated_quota"`
+	CarbsQuota            *float64          `json:"carbs_quota"`
+	CarbsSugarQuota       *float64          `json:"carbs_sugar_quota"`
+	CarbsSlowReleaseQuota *float64          `json:"carbs_slow_release_quota"`
+	CarbsFastReleaseQuota *float64          `json:"carbs_fast_release_quota"`
+	ProteinsQuota         *float64          `json:"proteins_quota"`
+	SaltQuota             *float64          `json:"salt_quota"`
+}
+
+func CreateMeal(ctx context.Context, meal CreateMealRequest) (*Meal, error) {
 	db, err := GetDB()
 	if err != nil {
 		return nil, err
 	}
 	var result *Meal
-	err = DoInTransaction(ctx, db, func(queries *sqlc.Queries) error {
-		notificationSqlc, notiErr := queries.CreateNotification(ctx, sqlc.CreateNotificationParams{
-			OwnerID:      meal.Notification.Owner.ID,
-			Time:         meal.Notification.Time,
-			DelaySeconds: nil,
-			DelayDate:    nil,
-		})
-		if notiErr != nil {
-			return notiErr
+	err = DoInTransaction(ctx, db, func(childCtx context.Context, queries *sqlc.Queries) error {
+		var notification sqlc.Notification_sqlc
+		var notificationId *int64
+		if meal.CreateNotification {
+			notificationSqlc, notiErr := queries.CreateNotification(childCtx, sqlc.CreateNotificationParams{
+				OwnerID:      meal.OwnerID,
+				Time:         meal.Time,
+				DelaySeconds: nil,
+				DelayDate:    nil,
+			})
+			if notiErr != nil {
+				return notiErr
+			}
+			notification = notificationSqlc
+			notificationId = &notificationSqlc.ID
 		}
-		mealSqlc, mealErr := queries.CreateMeal(ctx, sqlc.CreateMealParams{
-			OwnerID:               meal.Owner.ID,
-			NotificationID:        meal.Notification.ID,
+		mealSqlc, mealErr := queries.CreateMeal(childCtx, sqlc.CreateMealParams{
+			OwnerID:               meal.OwnerID,
+			NotificationID:        notificationId,
 			Name:                  meal.Name,
 			Time:                  meal.Time,
 			CaloriesQuota:         meal.CaloriesQuota,
@@ -95,7 +117,9 @@ func CreateMeal(ctx context.Context, meal *Meal) (*Meal, error) {
 			return err
 		}
 		result = convertMeal(&mealSqlc)
-		result.Notification = convertNotification(NotificationSqlcWrapper{notificationSqlc})
+		if meal.CreateNotification {
+			result.Notification = convertNotification(NotificationSqlcWrapper{notification})
+		}
 		return nil
 	})
 	if err != nil {
@@ -104,14 +128,29 @@ func CreateMeal(ctx context.Context, meal *Meal) (*Meal, error) {
 	return result, nil
 }
 
-func UpdateMeal(ctx context.Context, meal *Meal) (*Meal, error) {
+type UpdateMealRequest struct {
+	ID                    int64             `json:"id"`
+	NotificationID        *int64            `json:"notification_id"`
+	Name                  string            `json:"name"`
+	Time                  custom_types.Time `json:"time"`
+	CaloriesQuota         *float64          `json:"calories_quota"`
+	FatsQuota             *float64          `json:"fats_quota"`
+	FatsSaturatedQuota    *float64          `json:"fats_saturated_quota"`
+	CarbsQuota            *float64          `json:"carbs_quota"`
+	CarbsSugarQuota       *float64          `json:"carbs_sugar_quota"`
+	CarbsSlowReleaseQuota *float64          `json:"carbs_slow_release_quota"`
+	CarbsFastReleaseQuota *float64          `json:"carbs_fast_release_quota"`
+	ProteinsQuota         *float64          `json:"proteins_quota"`
+	SaltQuota             *float64          `json:"salt_quota"`
+}
+
+func UpdateMeal(ctx context.Context, meal UpdateMealRequest) (*Meal, error) {
 	queries, err := GetQueries()
 	if err != nil {
 		return nil, err
 	}
 	mealSqlc, err := queries.UpdateMeal(ctx, sqlc.UpdateMealParams{
-		OwnerID:               meal.Owner.ID,
-		NotificationID:        meal.Notification.ID,
+		NotificationID:        meal.NotificationID,
 		Name:                  meal.Name,
 		Time:                  meal.Time,
 		CaloriesQuota:         meal.CaloriesQuota,

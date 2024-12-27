@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS meals
 (
     id                       INTEGER PRIMARY KEY AUTOINCREMENT,
-    owner_id                 REFERENCES users NOT NULL,
-    notification_id          REFERENCES notifications,
+    owner_id                 INTEGER REFERENCES users NOT NULL,
+    notification_id          INTEGER REFERENCES notifications,
     name                     TEXT NOT NULL,
     time                     TIME NOT NULL,
     calories_quota           REAL,
@@ -43,9 +43,9 @@ LEFT JOIN notifications ON meals.notification_id = notifications.id;
 CREATE TABLE IF NOT EXISTS meallogs
 (
     id                 INTEGER PRIMARY KEY AUTOINCREMENT,
-    meal_id            REFERENCES meals NOT NULL,
-    item_id            REFERENCES items NOT NULL,
-    portion_id         REFERENCES portions NOT NULL,
+    meal_id            INTEGER REFERENCES meals NOT NULL,
+    item_id            INTEGER REFERENCES items NOT NULL,
+    portion_id         INTEGER REFERENCES portions NOT NULL,
     portion_multiplier REAL NOT NULL,
     datetime           DATETIME NOT NULL,
     CHECK (

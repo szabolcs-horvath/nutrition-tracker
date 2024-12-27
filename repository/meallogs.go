@@ -129,7 +129,7 @@ func CreateMealLog(ctx context.Context, mealLog CreateMealLogRequest) (*MealLog,
 }
 
 type UpdateMealLogRequest struct {
-	MealLogID         int64     `json:"id"`
+	ID                int64     `json:"id"`
 	MealID            int64     `json:"meal_id"`
 	ItemID            int64     `json:"item_id"`
 	PortionID         int64     `json:"portion_id"`
@@ -148,10 +148,21 @@ func UpdateMealLog(ctx context.Context, mealLog UpdateMealLogRequest) (*MealLog,
 		PortionID:         mealLog.PortionID,
 		PortionMultiplier: mealLog.PortionMultiplier,
 		Datetime:          mealLog.DateTime,
-		ID:                mealLog.MealLogID,
+		ID:                mealLog.ID,
 	})
 	if err != nil {
 		return nil, err
 	}
 	return convertMealLog(&mealLogSqlc), nil
+}
+
+func DeleteMealLog(ctx context.Context, id int64) error {
+	queries, err := GetQueries()
+	if err != nil {
+		return err
+	}
+	if err = queries.DeleteMealLog(ctx, id); err != nil {
+		return err
+	}
+	return nil
 }

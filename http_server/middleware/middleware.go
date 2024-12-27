@@ -62,15 +62,18 @@ func AddRequestId(next http.Handler) http.Handler {
 
 func LogIncomingRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		keyValues := make([]any, 0)
+		keyValues = append(keyValues, "METHOD", r.Method)
+		keyValues = append(keyValues, "PATH", r.URL.Path)
+		keyValues = append(keyValues, "REQUEST_ID", findRequestId(r))
+
 		body, _ := io.ReadAll(r.Body)
 		r.Body = io.NopCloser(bytes.NewReader(body))
-		requestId := findRequestId(r)
-		slog.InfoContext(r.Context(), "[LogIncomingRequest]",
-			"REQUEST_ID", requestId,
-			"METHOD", r.Method,
-			"PATH", r.URL.Path,
-			"BODY", body,
-		)
+		if !bytes.Equal(body, []byte("")) {
+			keyValues = append(keyValues, "BODY", body)
+		}
+
+		slog.InfoContext(r.Context(), "[LogIncomingRequest]", keyValues...)
 		next.ServeHTTP(w, r)
 	})
 }
@@ -94,23 +97,23 @@ func Authenticate(audience string, domain string) Middleware {
 
 func LogCompletedRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		keyValues := make([]any, 0)
+		keyValues = append(keyValues, "METHOD", r.Method)
+		keyValues = append(keyValues, "PATH", r.URL.Path)
+
 		wrappedW := &wrappedWriter{
 			ResponseWriter: w,
 			statusCode:     http.StatusOK,
 		}
-
 		start := time.Now()
 		next.ServeHTTP(wrappedW, r)
 		duration := time.Since(start)
 
-		requestId := findRequestId(r)
-		slog.InfoContext(r.Context(), "[LogCompletedRequest]",
-			"REQUEST_ID", requestId,
-			"METHOD", r.Method,
-			"PATH", r.URL.Path,
-			"STATUS", wrappedW.statusCode,
-			"DURATION", duration.String(),
-			"BODY", string(wrappedW.responseBody),
-		)
+		keyValues = append(keyValues, "STATUS", wrappedW.statusCode)
+		keyValues = append(keyValues, "DURATION", duration.String())
+		keyValues = append(keyValues, "REQUEST_ID", findRequestId(r))
+		keyValues = append(keyValues, "BODY", string(wrappedW.responseBody))
+
+		slog.InfoContext(r.Context(), "[LogCompletedRequest]", keyValues...)
 	})
 }

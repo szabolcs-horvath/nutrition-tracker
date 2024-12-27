@@ -25,3 +25,7 @@ SET meal_id = ?,
     datetime = ?
 WHERE id = ?
 RETURNING *;
+
+-- name: DeleteMealLog :exec
+DELETE FROM meallogs
+WHERE id = ?;

@@ -25,8 +25,7 @@ RETURNING *;
 
 -- name: UpdateMeal :one
 UPDATE meals
-SET owner_id = ?,
-    notification_id = ?,
+SET notification_id = ?,
     name = ?,
     time = ?,
     calories_quota = ?,

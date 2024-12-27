@@ -16,7 +16,6 @@ LIMIT 1;
 
 -- name: CreateItem :one
 INSERT INTO items(name,
-                  icon,
                   owner_id,
                   language_id,
                   liquid,
@@ -30,13 +29,16 @@ INSERT INTO items(name,
                   carbs_fast_release_per_100,
                   proteins_per_100,
                   salt_per_100)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 RETURNING *;
+
+-- name: CreateItemsPortionsJoiningTableRecord :exec
+INSERT INTO items_portions_joining_table(item_id, portion_id)
+VALUES (?, ?);
 
 -- name: UpdateItem :one
 UPDATE items
 SET name = ?,
-    icon = ?,
     owner_id = ?,
     language_id = ?,
     liquid = ?,

@@ -79,12 +79,36 @@ func FindUserById(ctx context.Context, id int64) (*User, error) {
 	return user, nil
 }
 
-func CreateUser(ctx context.Context, languageId int64) (*User, error) {
+type CreateUserRequest struct {
+	LanguageID int64 `json:"language_id"`
+}
+
+func CreateUser(ctx context.Context, user CreateUserRequest) (*User, error) {
 	queries, err := GetQueries()
 	if err != nil {
 		return nil, err
 	}
-	userSqlc, err := queries.CreateUser(ctx, languageId)
+	userSqlc, err := queries.CreateUser(ctx, user.LanguageID)
+	if err != nil {
+		return nil, err
+	}
+	return convertUser(UserSqlcWrapper{userSqlc}), nil
+}
+
+type UpdateUserRequest struct {
+	ID         int64 `json:"id"`
+	LanguageID int64 `json:"language_id"`
+}
+
+func UpdateUser(ctx context.Context, user UpdateUserRequest) (*User, error) {
+	queries, err := GetQueries()
+	if err != nil {
+		return nil, err
+	}
+	userSqlc, err := queries.UpdateUser(ctx, sqlc.UpdateUserParams{
+		LanguageID: user.LanguageID,
+		ID:         user.ID,
+	})
 	if err != nil {
 		return nil, err
 	}

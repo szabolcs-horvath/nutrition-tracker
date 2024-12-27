@@ -3,8 +3,12 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"github.com/szabolcs-horvath/nutrition-tracker/generated"
 )
+
+const transactionActive = "TRANSACTION_ACTIVE"
+const queriesPointer = "QUERIES_POINTER"
 
 func GetQueries() (*sqlc.Queries, error) {
 	db, err := GetDB()
@@ -14,18 +18,46 @@ func GetQueries() (*sqlc.Queries, error) {
 	return sqlc.New(db), nil
 }
 
-func DoInTransaction(ctx context.Context, db *sql.DB, action func(*sqlc.Queries) error) error {
-	tx, err := db.BeginTx(ctx, nil)
-	defer tx.Rollback()
-	if err != nil {
-		return err
+func DoInTransaction(ctx context.Context, db *sql.DB, action func(childCtx context.Context, queries *sqlc.Queries) error) error {
+	if isTransaction(ctx) {
+		// If request is already running in a transaction, don't begin a new one, reuse the *sqlc.Queries
+		queries, err := getQueriesPointer(ctx)
+		if err != nil {
+			return err
+		}
+		return action(ctx, queries)
+	} else {
+		ctx1 := context.WithValue(ctx, transactionActive, true)
+		tx, err := db.BeginTx(ctx, nil)
+		if err != nil {
+			return err
+		}
+		defer tx.Rollback()
+
+		queries := sqlc.New(db).WithTx(tx)
+		ctx2 := context.WithValue(ctx1, queriesPointer, queries)
+
+		err = action(ctx2, queries)
+		if err != nil {
+			return err
+		}
+
+		return tx.Commit()
 	}
-	queries := sqlc.New(db).WithTx(tx)
-	err = action(queries)
-	if err != nil {
-		return err
+}
+
+func isTransaction(ctx context.Context) bool {
+	if value, ok := ctx.Value(transactionActive).(bool); ok {
+		return value
 	}
-	return tx.Commit()
+	return false
+}
+
+func getQueriesPointer(ctx context.Context) (*sqlc.Queries, error) {
+	if value, ok := ctx.Value(queriesPointer).(*sqlc.Queries); ok {
+		return value, nil
+	}
+	return nil, fmt.Errorf("couldn't find queries pointer in context %v", ctx)
 }
 
 //func DoInTransaction(ctx context.Context, db *sql.DB, action func() error) error {

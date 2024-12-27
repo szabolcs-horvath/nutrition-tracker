@@ -1,4 +1,4 @@
--- name: FindPortionsForItemAndUser :many
+-- name: ListPortionsForItemAndUser :many
 SELECT sqlc.embed(portions)
 FROM portions
 JOIN items_portions_joining_table on portions.id = items_portions_joining_table.portion_id
@@ -13,6 +13,14 @@ JOIN items ON portions.liquid = items.liquid
 WHERE items.id = sqlc.arg(item_id)
 AND portions.owner_id IS NULL;
 
+-- name: ListNonDefaultPortionsForItem :many
+SELECT sqlc.embed(portions)
+FROM portions
+JOIN items_portions_joining_table on portions.id = items_portions_joining_table.portion_id
+JOIN items on items_portions_joining_table.item_id = items.id
+WHERE items.id = sqlc.arg(item_id)
+AND portions.owner_id IS NOT NULL;
+
 -- name: FindPortionById :one
 SELECT DISTINCT sqlc.embed(portions), sqlc.embed(portions_users_view), sqlc.embed(portions_languages_view)
 FROM portions
@@ -20,6 +28,11 @@ LEFT JOIN portions_users_view ON portions.owner_id = portions_users_view.id
 LEFT JOIN portions_languages_view ON portions.language_id = portions_languages_view.id
 WHERE portions.id = ?
 LIMIT 1;
+
+-- name: IsDefaultPortion :one
+SELECT owner_id IS NULL
+FROM portions
+WHERE id = ?;
 
 -- name: CreatePortion :one
 INSERT INTO portions(name,
