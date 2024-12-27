@@ -2,10 +2,10 @@ package routes
 
 import "net/http"
 
-func SubRouteHandlers(routes map[string]http.HandlerFunc) *http.ServeMux {
+func SubRouteHandlerFuncs(routes map[string]http.HandlerFunc) *http.ServeMux {
 	mux := http.NewServeMux()
-	for pattern, handler := range routes {
-		mux.HandleFunc(pattern, handler)
+	for pattern, handlerFunc := range routes {
+		mux.HandleFunc(pattern, handlerFunc)
 	}
 	return mux
 }
@@ -21,4 +21,8 @@ func SubRoute(routes map[string]*http.ServeMux) *http.ServeMux {
 func ServeRoute(router *http.ServeMux, prefix string, routes map[string]*http.ServeMux) {
 	mux := SubRoute(routes)
 	router.Handle(prefix+"/", http.StripPrefix(prefix, mux))
+}
+
+func ServeFS(router *http.ServeMux, prefix, dir string) {
+	router.Handle(prefix+"/", http.StripPrefix(prefix, http.FileServer(http.Dir(dir))))
 }

@@ -65,9 +65,7 @@ func main() {
 
 	app := newApp()
 	routes.ServeRoute(app.Router, api.Prefix, api.Routes())
-
-	fs := http.FileServer(http.Dir("web/static/vendor"))
-	app.Router.Handle("/static/", http.StripPrefix("/static/", fs))
+	routes.ServeFS(app.Router, "/static", "web/static/vendor")
 
 	app.Router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		mealLogs, err := repository.FindMealLogsForUserAndDate(r.Context(), 1)
