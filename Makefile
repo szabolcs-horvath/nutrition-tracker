@@ -1,5 +1,5 @@
 SQLITE_DB_FILE ?= sqlite/nutrition-tracker.db
-IT_SQLITE_DB_FILE ?= sqlite/nutrition-tracker-test.db
+IT_SQLITE_DB_FILE ?= it/nutrition-tracker-test.db
 SQLITE_MIGRATIONS_DIR ?= sqlite/migrations
 SQLC_VERSION ?= v1.27.0
 GOLANG_MIGRATE_VERSION ?= v4.18.1
@@ -29,31 +29,31 @@ generate:
 clean:
 	rm -rf generated out
 
-unit-test: sqlc
-	rm -f $(GOCOVERDIR)/unit-coverage.out
+ut: sqlc
+	rm -f $(GOCOVERDIR)/ut-coverage.out
 	mkdir -p $(GOCOVERDIR)
-	go test ./... -v -coverprofile=$(GOCOVERDIR)/unit-coverage.out -covermode=atomic -coverpkg=./...
+	go test ./... -v -coverprofile=$(GOCOVERDIR)/ut-coverage.out -covermode=atomic -coverpkg=./...
 
-integration-test: sqlc init-test-db
+it: sqlc init-test-db
 	rm -rf $(GOCOVERDIR)/it-coverage
 	mkdir -p $(GOCOVERDIR)/it-coverage
-	go build -o out/nutrition-tracker-integration-test -mod=readonly -covermode=atomic
-	integration-test/integration-test.sh out/nutrition-tracker-integration-test $(GOCOVERDIR)/it-coverage
+	go build -o out/nutrition-tracker-it -mod=readonly -covermode=atomic
+	it/integration-test.sh out/nutrition-tracker-it $(GOCOVERDIR)/it-coverage
 	go tool covdata textfmt -i=$(GOCOVERDIR)/it-coverage -o=$(GOCOVERDIR)/it-coverage.out
 
 init-test-db:
 	rm -f $(IT_SQLITE_DB_FILE)
 	make migrate-up-file SPECIFIED_DB_FILE=$(IT_SQLITE_DB_FILE)
-	sqlite3 $(IT_SQLITE_DB_FILE) < sqlite/seed_test.sql
+	sqlite3 $(IT_SQLITE_DB_FILE) < it/seed_test.sql
 
-coverage: unit-test integration-test
-	go run ./.github/merge-coverprofiles.go $(GOCOVERDIR)/merged-coverage.out $(GOCOVERDIR)/unit-coverage.out $(GOCOVERDIR)/it-coverage.out
+coverage: ut it
+	go run ./.github/merge-coverprofiles.go $(GOCOVERDIR)/merged-coverage.out $(GOCOVERDIR)/ut-coverage.out $(GOCOVERDIR)/it-coverage.out
 	go tool cover -html=$(GOCOVERDIR)/merged-coverage.out
 
-coverage-unit: unit-test
-	go tool cover -html=$(GOCOVERDIR)/unit-coverage.out
+coverage-ut: ut
+	go tool cover -html=$(GOCOVERDIR)/ut-coverage.out
 
-coverage-it: integration-test
+coverage-it: it
 	go tool cover -html=$(GOCOVERDIR)/it-coverage.out
 
 create-migration:
