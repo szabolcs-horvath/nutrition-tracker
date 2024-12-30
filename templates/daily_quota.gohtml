@@ -1,0 +1,36 @@
+{{ define "daily_quota" }}
+    <div class="accordion" id="dailyQuotaAccordion">
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDailyQuota">
+                    Daily Quota
+                </button>
+            </h2>
+            <div id="collapseDailyQuota" class="accordion-collapse collapse" data-bs-parent="#mealsAccordion">
+                <div class="accordion-body">
+                    {{ range $quota, $value := .DailyQuota.Quotas }}
+                        {{ if $value }}
+                            {{ $goal := index $.DailyQuota.Quotas $quota }}
+                            {{ $sum := sumForQuota $quota $.MealLogs }}
+                            {{ $remaining := remainingForDailyQuota $quota $.MealLogs $.DailyQuota }}
+                            {{ $percentage := percentageForDailyQuota $quota $.MealLogs $.DailyQuota }}
+                            <span>{{ $quota.String }}: {{ $sum }} / {{ $goal }} g</span>
+                            <div class="m-2 mt-0 progress-stacked" style="height: 2em">
+                                <div class="progress overflow-hidden" role="progressbar" style="width: {{ $percentage }}%; height: 2em">
+                                    <div class="progress-bar bg-primary">
+                                        {{ formatFloat $sum 2 }} g
+                                    </div>
+                                </div>
+                                <div class="progress overflow-hidden" role="progressbar" style="width: {{ subtractInt64 100 $percentage }}%; height: 2em">
+                                    <div class="progress-bar bg-secondary">
+                                        {{ formatFloat $remaining 2 }} g
+                                    </div>
+                                </div>
+                            </div>
+                        {{ end }}
+                    {{ end }}
+                </div>
+            </div>
+        </div>
+    </div>
+{{ end }}

@@ -1,0 +1,37 @@
+{{ define "meallog_form" }}
+    <form hx-swap="outerHTML" hx-post="api/v1/meallogs/" hx-ext="json-enc">
+        <div class="row">
+            <div class="col input-group mb-2">
+                <span class="input-group-text">Meal ID</span>
+                <input class="form-control" type="number" name="meal_id" required>
+            </div>
+            <div class="col input-group mb-2">
+                <span class="input-group-text">Item ID</span>
+                <input class="form-control" type="number" name="item_id" required>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col input-group mb-2">
+                <span class="input-group-text">Portion</span>
+                <select class="form-control" type="number" name="portion_id" required>
+                    <option selected>Select</option>
+                    {{ range . }}
+
+                    {{ end }}
+                </select>
+            </div>
+            <div class="col input-group mb-2">
+                <span class="input-group-text">Count</span>
+                <input class="form-control" type="number" name="portion_multiplier" step="any" inputmode="decimal" required>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col input-group mb-2">
+                <span class="input-group-text">Date Time</span>
+                <input id="date_time_input" class="form-control" type="datetime-local" name="date_time" required>
+                <script>document.getElementById("date_time_input").value = new Date().toLocaleString("sv-SE").slice(0, 16);</script>
+            </div>
+        </div>
+        <button class="form-control mb-2" type="submit">Add</button>
+    </form>
+{{ end }}

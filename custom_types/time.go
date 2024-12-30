@@ -18,16 +18,20 @@ func NewTime(t time.Time) (*Time, error) {
 	return &Time{_time: onlyTime}, nil
 }
 
-func (t Time) UnderlyingTime() time.Time {
+func (t *Time) UnderlyingTime() time.Time {
 	return t._time
 }
 
-func (t Time) Equal(arg Time) bool {
+func (t *Time) Equal(arg Time) bool {
 	return t._time.Format(time.TimeOnly) == arg._time.Format(time.TimeOnly)
 }
 
-func (t Time) Sub(arg Time) time.Duration {
+func (t *Time) Sub(arg Time) time.Duration {
 	return t._time.Sub(arg._time)
+}
+
+func (t *Time) String() string {
+	return t._time.Format(time.TimeOnly)
 }
 
 func (t *Time) Scan(src any) error {

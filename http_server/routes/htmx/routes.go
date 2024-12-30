@@ -13,6 +13,7 @@ func Routes() map[string]http.HandlerFunc {
 		"GET /":              rootHandler,
 		"GET /meals":         mealsHandler,
 		"GET /notifications": notificationsHandler,
+		"GET /items":         itemsHandler,
 	}
 }
 func rootHandler(w http.ResponseWriter, r *http.Request) {
@@ -76,11 +77,6 @@ func mealsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	items, err := repository.ListItems(r.Context())
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
 
 	mealLogsByMeal := util.GroupByKeys(mealLogs, meals, func(ml *repository.MealLog) *repository.Meal {
 		meal, _ := util.FindFirst(meals, func(m *repository.Meal) bool { return ml.Meal.ID == m.ID })
@@ -95,7 +91,6 @@ func mealsHandler(w http.ResponseWriter, r *http.Request) {
 			"Meals":          meals,
 			"MealLogs":       mealLogs,
 			"MealLogsByMeal": mealLogsByMeal,
-			"Items":          items,
 		},
 	}
 
@@ -121,6 +116,27 @@ func notificationsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = repository.Render(w, "notifications_tab", data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func itemsHandler(w http.ResponseWriter, r *http.Request) {
+	items, err := repository.ListItems(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	data := map[string]any{
+		"Title":   "Items",
+		"TabName": "items_tab",
+		"Data": map[string]any{
+			"Items": items,
+		},
+	}
+
+	err = repository.Render(w, "items_tab", data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}

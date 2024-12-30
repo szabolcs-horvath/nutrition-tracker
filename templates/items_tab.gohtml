@@ -1,0 +1,59 @@
+{{ define "items_tab" }}
+<!--    <pre>-->
+<!--        {{ printf "%#v" . }}-->
+<!--    </pre>-->
+    {{ template "items_content" .Data }}
+{{ end }}
+
+{{ define "items_content" }}
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link" hx-get="/htmx/meals" hx-target="#tab-content" hx-swap="outerHtml">Meals</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" hx-get="/htmx/notifications" hx-target="#tab-content" hx-swap="outerHtml">Notifications</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active" hx-get="/htmx/items" hx-target="#tab-content" hx-swap="outerHtml">Items</a>
+        </li>
+    </ul>
+    <hr/>
+    <div class="tab-content" role="tabpanel">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Calories</th>
+                        <th scope="col">Fats</th>
+                        <th scope="col">Fats Saturated</th>
+                        <th scope="col">Carbs</th>
+                        <th scope="col">Carbs Sugar</th>
+                        <th scope="col">Carbs Slow Release</th>
+                        <th scope="col">Carbs Fast Release</th>
+                        <th scope="col">Proteins</th>
+                        <th scope="col">Salt</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {{ range .Items }}
+                    <tr>
+                        <td>{{ .ID }}</td>
+                        <td>{{ .Name }}</td>
+                        <td>{{ .CaloriesPer100 }}</td>
+                        <td>{{ .FatsPer100 }}</td>
+                        <td>{{ .FatsSaturatedPer100 }}</td>
+                        <td>{{ .CarbsPer100 }}</td>
+                        <td>{{ .CarbsSugarPer100 }}</td>
+                        <td>{{ .CarbsSlowReleasePer100 }}</td>
+                        <td>{{ .CarbsFastReleasePer100 }}</td>
+                        <td>{{ .ProteinsPer100 }}</td>
+                        <td>{{ .SaltPer100 }}</td>
+                    </tr>
+                {{ end }}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{{ end }}

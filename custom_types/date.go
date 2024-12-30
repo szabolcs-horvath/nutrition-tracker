@@ -18,16 +18,20 @@ func NewDate(t time.Time) (*Date, error) {
 	return &Date{_time: onlyDate}, nil
 }
 
-func (d Date) UnderlyingTime() time.Time {
+func (d *Date) UnderlyingTime() time.Time {
 	return d._time
 }
 
-func (d Date) Sub(arg Date) time.Duration {
+func (d *Date) Sub(arg Date) time.Duration {
 	return d._time.Sub(arg._time)
 }
 
-func (d Date) Equal(arg Date) bool {
+func (d *Date) Equal(arg Date) bool {
 	return d._time.Format(time.DateOnly) == arg._time.Format(time.DateOnly)
+}
+
+func (d *Date) String() string {
+	return d._time.Format(time.DateOnly)
 }
 
 func (d *Date) Scan(src any) error {

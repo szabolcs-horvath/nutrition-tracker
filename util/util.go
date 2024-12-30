@@ -13,16 +13,6 @@ import (
 	"strings"
 )
 
-//var templates *template.Template
-//
-//func init() {
-//	templates = template.Must(template.New("templates").Funcs(TemplateFuncs()).ParseGlob("templates/*.html"))
-//}
-//
-//func Render(w io.Writer, name string, data interface{}) error {
-//	return templates.ExecuteTemplate(w, name, data)
-//}
-
 func Map[T, V any](slice []T, fn func(T) V) []V {
 	result := make([]V, len(slice))
 	for i, t := range slice {
