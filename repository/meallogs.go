@@ -2,7 +2,9 @@ package repository
 
 import (
 	"context"
+	"github.com/szabolcs-horvath/nutrition-tracker/custom_types"
 	sqlc "github.com/szabolcs-horvath/nutrition-tracker/generated"
+	"reflect"
 	"time"
 )
 
@@ -16,63 +18,24 @@ type MealLog struct {
 }
 
 func (m MealLog) getMultiplier() float64 {
-	return m.PortionMultiplier * m.Portion.getMultiplier()
+	return m.PortionMultiplier * m.Portion.getUnitPerPortion() / 100
 }
 
-func (m MealLog) GetCalories() float64 {
-	return m.getMultiplier() * m.Item.CaloriesPer100
-}
-
-func (m MealLog) GetFats() float64 {
-	return m.getMultiplier() * m.Item.FatsPer100
-}
-
-func (m MealLog) GetFatsSaturated() *float64 {
-	var result float64
-	if m.Item.FatsSaturatedPer100 != nil {
-		result = m.getMultiplier() * *m.Item.FatsSaturatedPer100
+func (m MealLog) GetByQuota(quota custom_types.Quota) float64 {
+	itemValue := reflect.ValueOf(m.Item)
+	if itemValue.Kind() == reflect.Ptr {
+		itemValue = itemValue.Elem()
 	}
-	return &result
-}
-
-func (m MealLog) GetCarbs() float64 {
-	return m.getMultiplier() * m.Item.CarbsPer100
-}
-
-func (m MealLog) GetCarbsSugar() *float64 {
-	var result float64
-	if m.Item.CarbsSugarPer100 != nil {
-		result = m.getMultiplier() * *m.Item.CarbsSugarPer100
+	field := itemValue.FieldByName(quota.String() + "Per100")
+	if field.Kind() == reflect.Ptr {
+		if field.IsNil() {
+			return 0
+		} else {
+			return m.getMultiplier() * field.Elem().Interface().(float64)
+		}
+	} else {
+		return m.getMultiplier() * field.Interface().(float64)
 	}
-	return &result
-}
-
-func (m MealLog) GetCarbsSlowRelease() *float64 {
-	var result float64
-	if m.Item.CarbsSlowReleasePer100 != nil {
-		result = m.getMultiplier() * *m.Item.CarbsSlowReleasePer100
-	}
-	return &result
-}
-
-func (m MealLog) GetCarbsFastRelease() *float64 {
-	var result float64
-	if m.Item.CarbsFastReleasePer100 != nil {
-		result = m.getMultiplier() * *m.Item.CarbsFastReleasePer100
-	}
-	return &result
-}
-
-func (m MealLog) GetProteins() float64 {
-	return m.getMultiplier() * m.Item.ProteinsPer100
-}
-
-func (m MealLog) GetSalt() *float64 {
-	var result float64
-	if m.Item.SaltPer100 != nil {
-		result = m.getMultiplier() * *m.Item.SaltPer100
-	}
-	return &result
 }
 
 func convertMealLog(mealLog *sqlc.MealLog_sqlc) *MealLog {

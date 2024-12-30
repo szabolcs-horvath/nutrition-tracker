@@ -11,8 +11,9 @@ This project's purpose is to help Kinga track and plan her diet.
 - :white_check_mark: [`go@1.23.1`](https://go.dev/dl/)
 - :white_check_mark: [`sqlite3`](https://command-not-found.com/sqlite3)
 - :white_check_mark: go dependencies
-  - :white_check_mark: [`sqlc`](https://docs.sqlc.dev/en/latest/overview/install.html)
-  - :white_check_mark: [`golang-migrate`](https://github.com/golang-migrate/migrate/tree/master)
+  - :white_check_mark: [`sqlc`](https://docs.sqlc.dev/en/latest/)
+  - :white_check_mark: [`golang-migrate`](https://github.com/golang-migrate/migrate/)
+  - :white_check_mark: [`stringer`](https://pkg.go.dev/golang.org/x/tools/cmd/stringer)
   - Install these with:
     ```shell
     make go-deps

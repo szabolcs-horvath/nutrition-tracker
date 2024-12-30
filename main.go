@@ -6,10 +6,8 @@ import (
 	"github.com/szabolcs-horvath/nutrition-tracker/http_server/middleware"
 	"github.com/szabolcs-horvath/nutrition-tracker/http_server/routes"
 	"github.com/szabolcs-horvath/nutrition-tracker/http_server/routes/api"
-	"github.com/szabolcs-horvath/nutrition-tracker/repository"
+	"github.com/szabolcs-horvath/nutrition-tracker/http_server/routes/htmx"
 	"github.com/szabolcs-horvath/nutrition-tracker/util"
-	"html/template"
-	"io"
 	"log/slog"
 	"net/http"
 	"os"
@@ -17,28 +15,6 @@ import (
 	"syscall"
 	"time"
 )
-
-type Templates struct {
-	templates *template.Template
-}
-
-type App struct {
-	Router    *http.ServeMux
-	Templates *Templates
-}
-
-func (app App) Render(w io.Writer, name string, data interface{}) error {
-	return app.Templates.templates.ExecuteTemplate(w, name, data)
-}
-
-func newApp() *App {
-	return &App{
-		Router: http.NewServeMux(),
-		Templates: &Templates{
-			templates: template.Must(template.New("templates").Funcs(util.TemplateFuncs()).ParseGlob("templates/*.html")),
-		},
-	}
-}
 
 func getEnvFile() string {
 	envFile := ".env"
@@ -51,11 +27,6 @@ func getEnvFile() string {
 	return envFile
 }
 
-type IndexData struct {
-	MealLogs []*repository.MealLog
-	Items    []*repository.Item
-}
-
 func main() {
 	envFile := getEnvFile()
 	if err := godotenv.Load(envFile); err != nil {
@@ -63,31 +34,10 @@ func main() {
 		panic(1)
 	}
 
-	app := newApp()
-	routes.ServeRoute(app.Router, api.Prefix, api.Routes())
-	routes.ServeFS(app.Router, "/static", "web/static/vendor")
-
-	app.Router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		mealLogs, err := repository.FindMealLogsForUserAndCurrentDay(r.Context(), 1)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-		items, err := repository.ListItems(r.Context())
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		data := IndexData{
-			MealLogs: mealLogs,
-			Items:    items,
-		}
-		err = app.Render(w, "index", data)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-		}
-	})
+	router := http.NewServeMux()
+	routes.ServeRoute(router, api.Prefix, api.Routes())
+	routes.ServeRouteHandlers(router, htmx.Prefix, htmx.Routes())
+	routes.ServeFS(router, "/static", "web/static/vendor")
 
 	middlewareStack := middleware.CreateStack(
 		middleware.AddRequestId,
@@ -97,7 +47,7 @@ func main() {
 	)
 	server := http.Server{
 		Addr:    ":" + util.SafeGetEnv("PORT"),
-		Handler: middlewareStack(app.Router),
+		Handler: middlewareStack(router),
 	}
 
 	go func() {

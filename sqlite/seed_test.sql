@@ -25,6 +25,15 @@ VALUES (1, 1, NULL, 'Breakfast', '08:00:00', 500, 20, 10, 50, 10, 20, 20, 20, 5,
        (5, 2, NULL, 'Ebéd', '12:00:00', 800, 30, 15, 80, 20, 40, 40, 30, 5, FALSE),
        (6, 2, NULL, 'Vacsora', '18:00:00', 700, 25, 12, 70, 15, 30, 30, 25, 5, FALSE);
 
+-- notifications
+INSERT INTO notifications(id, owner_id, time)
+VALUES (1, 1, '08:00:00'),
+       (2, 1, '12:00:00'),
+       (3, 1, '18:00:00'),
+       (4, 2, '08:00:00'),
+       (5, 2, '12:00:00'),
+       (6, 2, '18:00:00');
+
 -- languages
 INSERT INTO languages(id, name, native_name)
 VALUES (1, 'en', 'English'),

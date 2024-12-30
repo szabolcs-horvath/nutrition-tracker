@@ -1,0 +1,148 @@
+{{ define "meals_tab" }}
+<!--    <pre>-->
+<!--        {{ printf "%#v" . }}-->
+<!--    </pre>-->
+    {{ template "meals_content" .Data }}
+{{ end }}
+
+{{ define "meals_content" }}
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" hx-get="/htmx/meals" hx-target="#tab-content" hx-swap="outerHtml">Meals</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" hx-get="/htmx/notifications" hx-target="#tab-content" hx-swap="outerHtml">Notifications</a>
+        </li>
+    </ul>
+    <div class="tab-content" role="tabpanel">
+        {{ template "dailyQuota" . }}
+        <hr/>
+        {{ template "meallogsByMeal" . }}
+        <hr/>
+        <form hx-swap="outerHTML" hx-post="api/v1/meallogs/" hx-ext="json-enc">
+            mealId: <input type="number" name="meal_id" required>
+            itemId: <input type="number" name="item_id" required>
+            portionId: <input type="number" name="portion_id" required>
+            count: <input type="number" name="portion_multiplier" step="any" inputmode="decimal" required>
+            dateTime: <input type="datetime-local" name="date_time" required>
+            <button type="submit">Add</button>
+        </form>
+        <hr/>
+        {{ template "items" .Items }}
+    </div>
+{{ end }}
+
+{{ define "dailyQuota" }}
+    <div class="accordion" id="dailyQuotaAccordion">
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDailyQuota">
+                    Daily Quota
+                </button>
+            </h2>
+            <div id="collapseDailyQuota" class="accordion-collapse collapse" data-bs-parent="#mealsAccordion">
+                <div class="accordion-body">
+                    {{ range $quota, $value := .DailyQuota.Quotas }}
+                        {{ if $value }}
+                            {{ $goal := index $.DailyQuota.Quotas $quota }}
+                            {{ $sum := sumForQuota $quota $.MealLogs }}
+                            {{ $remaining := remainingForDailyQuota $quota $.MealLogs $.DailyQuota }}
+                            {{ $percentage := percentageForDailyQuota $quota $.MealLogs $.DailyQuota }}
+                            <span>{{ $quota.String }}: {{ $sum }} / {{ $goal }} g</span>
+                            <div class="m-2 mt-0 progress-stacked" style="height: 2em">
+                                <div class="progress overflow-hidden" role="progressbar" style="width: {{ $percentage }}%; height: 2em">
+                                    <div class="progress-bar bg-primary">
+                                        {{ formatFloat $sum 2 }} g
+                                    </div>
+                                </div>
+                                <div class="progress overflow-hidden" role="progressbar" style="width: {{ subtractInt64 100 $percentage }}%; height: 2em">
+                                    <div class="progress-bar bg-secondary">
+                                        {{ formatFloat $remaining 2 }} g
+                                    </div>
+                                </div>
+                            </div>
+                        {{ end }}
+                    {{ end }}
+                </div>
+            </div>
+        </div>
+    </div>
+{{ end }}
+
+{{ define "meallogsByMeal" }}
+    <div class="accordion" id="mealsAccordion">
+        {{ range $meal, $meallogs := .MealLogsByMeal }}
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <!--            <button class="accordion-button {{ if isClosestToCurrentTime $meal $.Meals }}{{ else }}collapsed{{ end }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ $meal.ID }}">-->
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ $meal.ID }}">
+                        {{ $meal.Name }}
+                    </button>
+                </h2>
+                <!--        <div id="collapse{{ $meal.ID }}" class="accordion-collapse collapse {{ if isClosestToCurrentTime $meal $.Meals }}show{{ end }}" data-bs-parent="#mealsAccordion">-->
+                <div id="collapse{{ $meal.ID }}" class="accordion-collapse collapse" data-bs-parent="#mealsAccordion">
+                    <div class="accordion-body">
+                        {{ range $quotaType, $quotaValue := $meal.Quotas }}
+                            {{ if $quotaValue }}
+                                {{ $quota := index $meal.Quotas $quotaType }}
+                                {{ $sum := sumForQuota $quotaType $meallogs }}
+                                {{ $remaining := remainingForMealQuota $quotaType $meallogs $meal }}
+                                {{ $percentage := percentageForMealQuota $quotaType $meallogs $meal }}
+                                <span>{{ $quotaType.String }}: {{ $sum }} / {{ $quota }} g</span>
+                                <div class="m-2 mt-0 progress-stacked" style="height: 2em">
+                                    <div class="progress overflow-hidden" role="progressbar" style="width: {{ $percentage }}%; height: 2em">
+                                        <div class="progress-bar bg-primary">
+                                            {{ formatFloat $sum 2 }} g
+                                        </div>
+                                    </div>
+                                    <div class="progress overflow-hidden" role="progressbar" style="width: {{ subtractInt64 100 $percentage }}%; height: 2em">
+                                        <div class="progress-bar bg-secondary">
+                                            {{ formatFloat $remaining 2 }} g
+                                        </div>
+                                    </div>
+                                </div>
+                            {{ end }}
+                        {{ end }}
+                    </div>
+                </div>
+            </div>
+        {{ end }}
+    </div>
+{{ end }}
+
+{{ define "items" }}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Calories</th>
+                <th scope="col">Fats</th>
+                <th scope="col">Fats Saturated</th>
+                <th scope="col">Carbs</th>
+                <th scope="col">Carbs Sugar</th>
+                <th scope="col">Carbs Slow Release</th>
+                <th scope="col">Carbs Fast Release</th>
+                <th scope="col">Proteins</th>
+                <th scope="col">Salt</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{ range . }}
+                <tr>
+                    <td>{{ .ID }}</td>
+                    <td>{{ .Name }}</td>
+                    <td>{{ .CaloriesPer100 }}</td>
+                    <td>{{ .FatsPer100 }}</td>
+                    <td>{{ .FatsSaturatedPer100 }}</td>
+                    <td>{{ .CarbsPer100 }}</td>
+                    <td>{{ .CarbsSugarPer100 }}</td>
+                    <td>{{ .CarbsSlowReleasePer100 }}</td>
+                    <td>{{ .CarbsFastReleasePer100 }}</td>
+                    <td>{{ .ProteinsPer100 }}</td>
+                    <td>{{ .SaltPer100 }}</td>
+                </tr>
+            {{ end }}
+        </tbody>
+    </table>
+{{ end }}

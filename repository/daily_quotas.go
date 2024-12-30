@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"github.com/szabolcs-horvath/nutrition-tracker/custom_types"
 	sqlc "github.com/szabolcs-horvath/nutrition-tracker/generated"
 	"time"
 )
@@ -129,33 +130,28 @@ type DailyQuota struct {
 	ID               int64
 	Owner            *User
 	ArchivedDateTime *time.Time
-	Calories         *float64
-	Fats             *float64
-	FatsSaturated    *float64
-	Carbs            *float64
-	CarbsSugar       *float64
-	CarbsSlowRelease *float64
-	CarbsFastRelease *float64
-	Proteins         *float64
-	Salt             *float64
+	Quotas           map[custom_types.Quota]*float64
 }
 
 func converDailyQuota(dailyQuota DailyQuotaFromDB) *DailyQuota {
 	if dailyQuota.getId() == nil {
 		return nil
 	} else {
+		quotas := map[custom_types.Quota]*float64{
+			custom_types.Calories:         dailyQuota.getCalories(),
+			custom_types.Fats:             dailyQuota.getFats(),
+			custom_types.FatsSaturated:    dailyQuota.getFatsSaturated(),
+			custom_types.Carbs:            dailyQuota.getCarbs(),
+			custom_types.CarbsSugar:       dailyQuota.getCarbsSugar(),
+			custom_types.CarbsSlowRelease: dailyQuota.getCarbsSlowRelease(),
+			custom_types.CarbsFastRelease: dailyQuota.getCarbsFastRelease(),
+			custom_types.Proteins:         dailyQuota.getProteins(),
+			custom_types.Salt:             dailyQuota.getSalt(),
+		}
 		return &DailyQuota{
 			ID:               *dailyQuota.getId(),
 			ArchivedDateTime: dailyQuota.getArchivedDateTime(),
-			Calories:         dailyQuota.getCalories(),
-			Fats:             dailyQuota.getFats(),
-			FatsSaturated:    dailyQuota.getFatsSaturated(),
-			Carbs:            dailyQuota.getCarbs(),
-			CarbsSugar:       dailyQuota.getCarbsSugar(),
-			CarbsSlowRelease: dailyQuota.getCarbsSlowRelease(),
-			CarbsFastRelease: dailyQuota.getCarbsFastRelease(),
-			Proteins:         dailyQuota.getProteins(),
-			Salt:             dailyQuota.getSalt(),
+			Quotas:           quotas,
 		}
 	}
 }

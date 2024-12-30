@@ -7,38 +7,33 @@ import (
 )
 
 type Meal struct {
-	ID                    int64
-	Owner                 *User
-	Notification          *Notification
-	Name                  string
-	Time                  custom_types.Time
-	CaloriesQuota         *float64
-	FatsQuota             *float64
-	FatsSaturatedQuota    *float64
-	CarbsQuota            *float64
-	CarbsSugarQuota       *float64
-	CarbsSlowReleaseQuota *float64
-	CarbsFastReleaseQuota *float64
-	ProteinsQuota         *float64
-	SaltQuota             *float64
-	Archived              bool
+	ID           int64
+	Owner        *User
+	Notification *Notification
+	Name         string
+	Time         custom_types.Time
+	Quotas       map[custom_types.Quota]*float64
+	Archived     bool
 }
 
 func convertMeal(meal *sqlc.Meal_sqlc) *Meal {
+	quotas := map[custom_types.Quota]*float64{
+		custom_types.Calories:         meal.CaloriesQuota,
+		custom_types.Fats:             meal.FatsQuota,
+		custom_types.FatsSaturated:    meal.FatsSaturatedQuota,
+		custom_types.Carbs:            meal.CarbsQuota,
+		custom_types.CarbsSugar:       meal.CarbsSugarQuota,
+		custom_types.CarbsSlowRelease: meal.CarbsSlowReleaseQuota,
+		custom_types.CarbsFastRelease: meal.CarbsFastReleaseQuota,
+		custom_types.Proteins:         meal.ProteinsQuota,
+		custom_types.Salt:             meal.SaltQuota,
+	}
 	return &Meal{
-		ID:                    meal.ID,
-		Name:                  meal.Name,
-		Time:                  meal.Time,
-		CaloriesQuota:         meal.CaloriesQuota,
-		FatsQuota:             meal.FatsQuota,
-		FatsSaturatedQuota:    meal.FatsSaturatedQuota,
-		CarbsQuota:            meal.CarbsQuota,
-		CarbsSugarQuota:       meal.CarbsSugarQuota,
-		CarbsSlowReleaseQuota: meal.CarbsSlowReleaseQuota,
-		CarbsFastReleaseQuota: meal.CarbsFastReleaseQuota,
-		ProteinsQuota:         meal.ProteinsQuota,
-		SaltQuota:             meal.SaltQuota,
-		Archived:              meal.Archived,
+		ID:       meal.ID,
+		Name:     meal.Name,
+		Time:     meal.Time,
+		Quotas:   quotas,
+		Archived: meal.Archived,
 	}
 }
 

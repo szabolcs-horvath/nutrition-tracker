@@ -15,7 +15,7 @@ type Portion struct {
 	VolumeInMls   *float64
 }
 
-func (p Portion) getMultiplier() float64 {
+func (p Portion) getUnitPerPortion() float64 {
 	if p.Liquid {
 		return *p.VolumeInMls
 	} else {
