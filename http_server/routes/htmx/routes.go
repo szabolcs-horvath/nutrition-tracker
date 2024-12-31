@@ -12,11 +12,12 @@ const Prefix = "/htmx"
 
 func Routes() map[string]http.HandlerFunc {
 	return map[string]http.HandlerFunc{
-		"GET /":              rootHandler,
-		"GET /today":         todayHandler,
-		"GET /notifications": notificationsHandler,
-		"GET /items":         itemsHandler,
-		"POST /items/search": itemSearchHandler,
+		"GET /":                        rootHandler,
+		"GET /today":                   todayHandler,
+		"GET /notifications":           notificationsHandler,
+		"GET /items":                   itemsHandler,
+		"POST /items/search":           itemSearchHandler,
+		"POST /meallogs/meal/{mealId}": addMealLogForMealHandler,
 	}
 }
 func rootHandler(w http.ResponseWriter, r *http.Request) {
@@ -171,6 +172,37 @@ func itemSearchHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = repository.Render(w, "item_search_results", data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func addMealLogForMealHandler(w http.ResponseWriter, r *http.Request) {
+	mealIdParam := r.PathValue("mealId")
+	mealId, err := strconv.ParseInt(mealIdParam, 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var requestMealLog repository.CreateMealLogRequest
+	if err = util.ReadJson(r, &requestMealLog); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	_, err = repository.CreateMealLog(r.Context(), requestMealLog)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	meallogs, err := repository.FindMealLogsForMealAndCurrentDay(r.Context(), mealId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = repository.Render(w, "meallogs_simple", meallogs)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}

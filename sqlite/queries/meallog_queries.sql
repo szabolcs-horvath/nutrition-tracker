@@ -16,6 +16,15 @@ JOIN portions ON meallogs.portion_id = portions.id
 WHERE meals.owner_id = ?
 AND date(meallogs.datetime) IS date(sqlc.arg(date));
 
+-- name: FindMealLogsForMealAndDate :many
+SELECT sqlc.embed(meallogs), sqlc.embed(meals), sqlc.embed(items), sqlc.embed(portions)
+FROM meallogs
+JOIN meals ON meallogs.meal_id = meals.id
+JOIN items ON meallogs.item_id = items.id
+JOIN portions ON meallogs.portion_id = portions.id
+WHERE meals.id = sqlc.arg(meal_id)
+AND date(meallogs.datetime) IS date(sqlc.arg(date));
+
 -- name: CreateMealLog :one
 INSERT INTO meallogs(meal_id,
                      item_id,

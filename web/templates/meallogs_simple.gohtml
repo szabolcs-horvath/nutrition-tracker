@@ -1,0 +1,30 @@
+{{ define "meallogs_simple" }}
+    {{ range . }}
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <h6 class="card-title">
+                            {{ .Item.Name }} - {{ .PortionMultiplier }} {{ .Portion.Name }}
+                        </h6>
+                        <h6 class="card-subtitle text-muted">
+                            {{ .DateTime.Format "15:04" }}
+                        </h6>
+                    </div>
+                    <div class="col text-end">
+{{/*                                                TODO: Add the hx attributes and endpoints for these buttons*/}}
+                        <button type="button" class="btn btn-outline-warning">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-danger">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="row">
+{{/*                                            TODO: This where the form to update meallog should appear if you press the edit button*/}}
+                </div>
+            </div>
+        </div>
+    {{ end }}
+{{ end }}

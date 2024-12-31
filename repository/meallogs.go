@@ -106,6 +106,28 @@ func FindMealLogsForUserAndDate(ctx context.Context, ownerId int64, date time.Ti
 	return result, nil
 }
 
+func FindMealLogsForMealAndCurrentDay(ctx context.Context, mealId int64) ([]*MealLog, error) {
+	queries, err := GetQueries()
+	if err != nil {
+		return nil, err
+	}
+	list, err := queries.FindMealLogsForMealAndDate(ctx, sqlc.FindMealLogsForMealAndDateParams{
+		MealID: mealId,
+		Date:   time.Now(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*MealLog, len(list))
+	for i, m := range list {
+		result[i] = convertMealLog(&m.MealLogSqlc)
+		result[i].Meal = convertMeal(&m.MealSqlc)
+		result[i].Item = convertItem(&m.ItemSqlc)
+		result[i].Portion = convertPortion(&m.PortionSqlc)
+	}
+	return result, nil
+}
+
 type CreateMealLogRequest struct {
 	MealID            int64     `json:"meal_id"`
 	ItemID            int64     `json:"item_id"`

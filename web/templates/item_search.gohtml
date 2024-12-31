@@ -88,8 +88,10 @@
                                 </table>
                             </div>
                             <hr/>
-        {{/*                TODO this form should target an htmx endpoint that returns all meallogs for this meal and oob swaps the list at the top*/}}
-                            <form hx-swap="none" hx-post="/api/v1/meallogs/" hx-ext="json-enc">
+                            <form hx-swap="innerHtml"
+                                  hx-target="#meallogs_for_meal_{{ $.Data.Meal.ID }}"
+                                  hx-post="meallogs/meal/{{ $.Data.Meal.ID }}"
+                                  hx-ext="json-enc">
                                 <div class="row" hidden>
                                     <div class="col input-group mb-2">
                                         <span class="input-group-text">Meal ID</span>
