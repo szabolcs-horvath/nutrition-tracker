@@ -3,17 +3,7 @@
 {{ end }}
 
 {{ define "items_content" }}
-    <ul class="nav nav-tabs" role="tablist">
-        <li class="nav-item">
-            <a class="nav-link" hx-get="/htmx/today" hx-target="#tab-content" hx-swap="outerHtml">Today</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" hx-get="/htmx/notifications" hx-target="#tab-content" hx-swap="outerHtml">Notifications</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link active" hx-get="/htmx/items" hx-target="#tab-content" hx-swap="outerHtml">Items</a>
-        </li>
-    </ul>
+    {{ template "tabs" "items" }}
     <hr/>
     <div class="tab-content" role="tabpanel">
         <div class="table-responsive">

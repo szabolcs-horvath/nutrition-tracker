@@ -1,0 +1,13 @@
+{{ define "tabs" }}
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link {{ if eq . "today" }}active{{ end }}" hx-get="/htmx/today" hx-target="#tab-content" hx-swap="outerHtml">Today</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ if eq . "notifications" }}active{{ end }}" hx-get="/htmx/notifications" hx-target="#tab-content" hx-swap="outerHtml">Notifications</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ if eq . "items" }}active{{ end }}" hx-get="/htmx/items" hx-target="#tab-content" hx-swap="outerHtml">Items</a>
+        </li>
+    </ul>
+{{ end }}

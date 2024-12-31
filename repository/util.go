@@ -11,7 +11,9 @@ import (
 var templates *template.Template
 
 func init() {
-	templates = template.Must(template.New("templates").Funcs(util.TemplateFuncs()).Funcs(TemplateFuncs()).ParseGlob("web/templates/*.gohtml"))
+	templates = template.New("templates").Funcs(util.TemplateFuncs()).Funcs(TemplateFuncs())
+	template.Must(templates.ParseGlob("web/templates/*.gohtml"))
+	template.Must(templates.ParseGlob("web/templates/**/*.gohtml"))
 }
 
 func Render(w io.Writer, name string, data any) error {
