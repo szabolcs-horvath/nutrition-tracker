@@ -14,6 +14,15 @@ JOIN portions ON items.default_portion_id = portions.id
 WHERE items.id = ?
 LIMIT 1;
 
+-- name: SearchItemsByNameAndUser :many
+SELECT DISTINCT sqlc.embed(items), sqlc.embed(items_users_view), sqlc.embed(languages), sqlc.embed(portions)
+FROM items
+LEFT JOIN items_users_view ON items.owner_id = items_users_view.id
+JOIN languages ON items.language_id = languages.id
+JOIN portions ON items.default_portion_id = portions.id
+WHERE (items.owner_id IS NULL OR items.owner_id IS ?)
+AND items.name LIKE '%' || sqlc.arg(query) || '%' COLLATE NOCASE;
+
 -- name: CreateItem :one
 INSERT INTO items(name,
                   owner_id,

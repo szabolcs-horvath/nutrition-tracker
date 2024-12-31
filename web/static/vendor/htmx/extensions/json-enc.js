@@ -12,6 +12,9 @@ htmx.defineExtension('json-enc', {
             if (inputElement && inputElement.type === "number") {
                 return Number(value);
             }
+            if (inputElement && inputElement.type === "select-one") {
+                return Number(value);
+            }
             if (inputElement && inputElement.type === "datetime-local" && typeof value === "string" && value.includes("T")) {
                 // Ensure datetime is in the correct format (e.g., add :00Z if needed)
                 return value.endsWith("Z") ? value : value + ":00Z";

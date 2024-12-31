@@ -8,7 +8,6 @@ import (
 	"math"
 	"net/http"
 	"os"
-	"reflect"
 	"strconv"
 	"strings"
 )
@@ -64,29 +63,6 @@ func PercentageRemaining(a, b float64) int64 {
 	return int64(math.Max(100-(a/b*100), 0))
 }
 
-func StructToMap(input any) map[string]any {
-	val := reflect.ValueOf(input)
-	typ := reflect.TypeOf(input)
-
-	// Ensure input is a struct
-	if val.Kind() == reflect.Ptr {
-		val = val.Elem()
-		typ = typ.Elem()
-	}
-	if val.Kind() != reflect.Struct {
-		panic("input must be a struct or a pointer to a struct")
-	}
-
-	result := make(map[string]interface{}, val.NumField())
-	// Iterate through struct fields
-	for i := 0; i < val.NumField(); i++ {
-		field := typ.Field(i)
-		fieldValue := val.Field(i)
-		result[field.Name] = fieldValue.Interface()
-	}
-	return result
-}
-
 func SafeGetEnv(key string) string {
 	if os.Getenv(key) == "" {
 		slog.Error("[SafeGetEnv] The environment variable '" + key + "' is not set.")
@@ -130,9 +106,18 @@ func TemplateFuncs() template.FuncMap {
 				return "bg-success"
 			}
 		},
-		"formatFloat": func(value float64, precision int) string {
+		"formatFloat": func(value any, precision int) any {
+			var floatValue float64
+			switch value.(type) {
+			case float64:
+				floatValue = value.(float64)
+			case *float64:
+				floatValue = *value.(*float64)
+			default:
+				return value
+			}
 			p := math.Pow(10, float64(precision))
-			rounded := math.Round(value*p) / p
+			rounded := math.Round(floatValue*p) / p
 
 			formatted := fmt.Sprintf("%."+strconv.Itoa(precision)+"f", rounded)
 

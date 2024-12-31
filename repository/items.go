@@ -97,6 +97,38 @@ func FindItemById(ctx context.Context, id int64) (*Item, error) {
 	return item, nil
 }
 
+func SearchItemsByNameAndUser(ctx context.Context, userId int64, query string) ([]*Item, error) {
+	queries, err := GetQueries()
+	if err != nil {
+		return nil, err
+	}
+	list, err := queries.SearchItemsByNameAndUser(ctx, sqlc.SearchItemsByNameAndUserParams{
+		OwnerID: &userId,
+		Query:   &query,
+	})
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*Item, len(list))
+	for i, n := range list {
+		result[i] = convertItem(&n.ItemSqlc)
+		if &n.ItemsUsersView != nil {
+			result[i].Owner = convertUser(ItemsUsersViewWrapper{n.ItemsUsersView})
+		}
+		result[i].Language = convertLanguage(LanguageSqlcWrapper{n.LanguageSqlc})
+		result[i].DefaultPortion = convertPortion(&n.PortionSqlc)
+		if result[i].Owner != nil {
+			result[i].Portions, err = ListPortionsForItemAndUser(ctx, result[i].ID, &result[i].Owner.ID)
+		} else {
+			result[i].Portions, err = ListPortionsForItemAndUser(ctx, result[i].ID, nil)
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	return result, nil
+}
+
 type CreateItemRequest struct {
 	Name                   string   `json:"name"`
 	OwnerID                *int64   `json:"owner_id"`

@@ -1,9 +1,11 @@
 package htmx
 
 import (
+	"fmt"
 	"github.com/szabolcs-horvath/nutrition-tracker/repository"
 	"github.com/szabolcs-horvath/nutrition-tracker/util"
 	"net/http"
+	"strconv"
 )
 
 const Prefix = "/htmx"
@@ -11,9 +13,10 @@ const Prefix = "/htmx"
 func Routes() map[string]http.HandlerFunc {
 	return map[string]http.HandlerFunc{
 		"GET /":              rootHandler,
-		"GET /meals":         mealsHandler,
+		"GET /today":         todayHandler,
 		"GET /notifications": notificationsHandler,
 		"GET /items":         itemsHandler,
+		"POST /items/search": itemSearchHandler,
 	}
 }
 func rootHandler(w http.ResponseWriter, r *http.Request) {
@@ -44,8 +47,8 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 	})
 
 	data := map[string]any{
-		"Title":   "Meals",
-		"TabName": "meals_tab",
+		"Title":   "Today",
+		"TabName": "today_tab",
 		"Data": map[string]any{
 			"DailyQuota":     dailyQuota,
 			"Meals":          meals,
@@ -61,7 +64,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func mealsHandler(w http.ResponseWriter, r *http.Request) {
+func todayHandler(w http.ResponseWriter, r *http.Request) {
 	dailyQuota, err := repository.FindDailyQuotaByOwnerAndCurrentDay(r.Context(), 1)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -84,8 +87,8 @@ func mealsHandler(w http.ResponseWriter, r *http.Request) {
 	})
 
 	data := map[string]any{
-		"Title":   "Meals",
-		"TabName": "meals_tab",
+		"Title":   "Today",
+		"TabName": "today_tab",
 		"Data": map[string]any{
 			"DailyQuota":     dailyQuota,
 			"Meals":          meals,
@@ -94,7 +97,7 @@ func mealsHandler(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	err = repository.Render(w, "meals_tab", data)
+	err = repository.Render(w, "today_tab", data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -137,6 +140,37 @@ func itemsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = repository.Render(w, "items_tab", data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func itemSearchHandler(w http.ResponseWriter, r *http.Request) {
+	query := r.FormValue("query")
+	if len(query) < 2 {
+		http.Error(w, fmt.Errorf("the search string has to be at least 2 characters").Error(), http.StatusBadRequest)
+		return
+	}
+	results, err := repository.SearchItemsByNameAndUser(r.Context(), 1, query)
+
+	var meal *repository.Meal
+	if mealIdParam := r.FormValue("meal_id"); mealIdParam != "" {
+		mealId, intParseErr := strconv.ParseInt(mealIdParam, 10, 64)
+		if intParseErr != nil {
+			http.Error(w, fmt.Errorf("failure while trying to parse meal_id: %s", intParseErr.Error()).Error(), http.StatusBadRequest)
+			return
+		}
+		meal, err = repository.FindMealById(r.Context(), mealId)
+	}
+
+	data := map[string]any{
+		"Data": map[string]any{
+			"Meal":          meal,
+			"SearchResults": results,
+		},
+	}
+
+	err = repository.Render(w, "item_search_results", data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}

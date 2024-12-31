@@ -14,7 +14,7 @@
                             {{ $sum := sumForQuota $quota $.MealLogs }}
                             {{ $remaining := remainingForDailyQuota $quota $.MealLogs $.DailyQuota }}
                             {{ $percentage := percentageForDailyQuota $quota $.MealLogs $.DailyQuota }}
-                            <span>{{ $quota.String }}: {{ $sum }} / {{ $goal }} g</span>
+                            <span>{{ $quota.String }}: {{ formatFloat $sum 2 }} / {{ formatFloat $goal 2 }} g</span>
                             <div class="m-2 mt-0 progress-stacked" style="height: 2em">
                                 <div class="progress overflow-hidden" role="progressbar" style="width: {{ $percentage }}%; height: 2em">
                                     <div class="progress-bar bg-primary">

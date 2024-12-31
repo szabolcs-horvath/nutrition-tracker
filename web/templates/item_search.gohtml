@@ -1,0 +1,134 @@
+{{ define "item_search" }}
+    <h3>
+        Add an item to this meal
+        <span class="htmx-indicator" style="display: none;">Searching...</span>
+    </h3>
+    <input class="form-control mb-2" type="text" placeholder="Search items by name..." name="query" minlength="2"
+           hx-post="/htmx/items/search?meal_id={{ . }}"
+           hx-trigger="keyup[target.value.length >= 2] changed delay:500ms"
+           hx-target="#search-results{{ . }}"
+           hx-indicator=".htmx-indicator">
+    <div id="search-results{{ . }}"></div>
+{{ end }}
+
+{{ define "item_search_results" }}
+    <div class="card">
+        <div class="card-body">
+            {{ if eq (len .Data.SearchResults) 0 }}
+                <h4>No items found.</h4>
+            {{ else }}
+                {{ range .Data.SearchResults }}
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title">{{ .Name }}</h4>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-sm table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Macro</th>
+                                            <th scope="col">Per 100{{ if .Liquid }}ml{{ else }}g{{ end }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {{ if .CaloriesPer100 }}
+                                            <tr>
+                                                <td><strong>Calories:</strong></td>
+                                                <td>{{ formatFloat .CaloriesPer100 2 }} kcal</td>
+                                            </tr>
+                                        {{ end }}
+                                        {{ if .FatsPer100 }}
+                                            <tr>
+                                                <td><strong>Fats:</strong></td>
+                                                <td>{{ formatFloat .FatsPer100 2 }} g</td>
+                                            </tr>
+                                        {{ end }}
+                                        {{ if .FatsSaturatedPer100 }}
+                                            <tr>
+                                                <td><strong>Fats Saturated:</strong></td>
+                                                <td>{{ formatFloat .FatsSaturatedPer100 2 }} g</td>
+                                            </tr>
+                                        {{ end }}
+                                        {{ if .CarbsPer100 }}
+                                            <tr>
+                                                <td><strong>Carbs:</strong></td>
+                                                <td>{{ formatFloat .CarbsPer100 2 }} g</td>
+                                            </tr>
+                                        {{ end }}
+                                        {{ if .CarbsSugarPer100 }}
+                                            <tr>
+                                                <td><strong>Carbs Sugar:</strong></td>
+                                                <td>{{ formatFloat .CarbsSugarPer100 2 }} g</td>
+                                            </tr>
+                                        {{ end }}
+                                        {{ if .CarbsSlowReleasePer100 }}
+                                            <tr>
+                                                <td><strong>Carbs Slow Release:</strong></td>
+                                                <td>{{ formatFloat .CarbsSlowReleasePer100 2 }} g</td>
+                                            </tr>
+                                        {{ end }}
+                                        {{ if .CarbsFastReleasePer100 }}
+                                            <tr>
+                                                <td><strong>Carbs Fast Release:</strong></td>
+                                                <td>{{ formatFloat .CarbsFastReleasePer100 2 }} g</td>
+                                            </tr>
+                                        {{ end }}
+                                        {{ if .ProteinsPer100 }}
+                                            <tr>
+                                                <td><strong>Proteins:</strong></td>
+                                                <td>{{ formatFloat .ProteinsPer100 2 }} g</td>
+                                            </tr>
+                                        {{ end }}
+                                        {{ if .SaltPer100 }}
+                                            <tr>
+                                                <td><strong>Salt:</strong></td>
+                                                <td>{{ formatFloat .SaltPer100 2 }} g</td>
+                                            </tr>
+                                        {{ end }}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <hr/>
+        {{/*                TODO this form should target an htmx endpoint that returns all meallogs for this meal and oob swaps the list at the top*/}}
+                            <form hx-swap="none" hx-post="/api/v1/meallogs/" hx-ext="json-enc">
+                                <div class="row" hidden>
+                                    <div class="col input-group mb-2">
+                                        <span class="input-group-text">Meal ID</span>
+                                        <input class="form-control" type="number" value="{{ $.Data.Meal.ID }}" name="meal_id" required readonly>
+                                    </div>
+                                    <div class="col input-group mb-2">
+                                        <span class="input-group-text">Item ID</span>
+                                        <input class="form-control" type="number" value="{{ .ID }}" name="item_id" required readonly>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col input-group mb-2">
+                                        <span class="input-group-text">Amount</span>
+                                        <input class="form-control" type="number" name="portion_multiplier" step="any" inputmode="decimal" required>
+                                    </div>
+                                    <div class="col input-group mb-2">
+                                        <span class="input-group-text">Portion</span>
+                                        <select class="form-control" type="number" name="portion_id" required>
+                                            {{ range .Portions }}
+                                                <option value="{{ .ID }}">{{ .Name }}</option>
+                                            {{ end }}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col input-group mb-2">
+                                        <span class="input-group-text">Date Time</span>
+                                        <input id="date_time_input{{ $.Data.Meal.ID }}" class="form-control" type="datetime-local" name="date_time" required>
+                                        <script>document.getElementById("date_time_input{{ $.Data.Meal.ID }}").value = new Date().toLocaleString("sv-SE").slice(0, 16);</script>
+                                    </div>
+                                </div>
+                                <button class="form-control mb-2" type="submit">
+                                    Add
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {{ end }}
+            {{ end }}
+        </div>
+    </div>
+{{ end }}

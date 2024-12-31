@@ -1,7 +1,7 @@
-{{ define "meals_tab" }}
+{{ define "today_tab" }}
     <ul class="nav nav-tabs" role="tablist">
         <li class="nav-item">
-            <a class="nav-link active" hx-get="/htmx/meals" hx-target="#tab-content" hx-swap="outerHtml">Meals</a>
+            <a class="nav-link active" hx-get="/htmx/today" hx-target="#tab-content" hx-swap="outerHtml">Today</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" hx-get="/htmx/notifications" hx-target="#tab-content" hx-swap="outerHtml">Notifications</a>
@@ -12,10 +12,10 @@
     </ul>
     <hr/>
     <div class="tab-content" role="tabpanel">
-        {{ template "daily_quota" .Data }}
-        <hr/>
+        {{ if .Data.DailyQuota }}
+            {{ template "daily_quota" .Data }}
+            <hr/>
+        {{ end }}
         {{ template "meallogs_by_meal" .Data }}
-        <hr/>
-        {{ template "meallog_form" .Data }}
     </div>
 {{ end }}

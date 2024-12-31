@@ -1,14 +1,11 @@
 {{ define "items_tab" }}
-<!--    <pre>-->
-<!--        {{ printf "%#v" . }}-->
-<!--    </pre>-->
     {{ template "items_content" .Data }}
 {{ end }}
 
 {{ define "items_content" }}
     <ul class="nav nav-tabs" role="tablist">
         <li class="nav-item">
-            <a class="nav-link" hx-get="/htmx/meals" hx-target="#tab-content" hx-swap="outerHtml">Meals</a>
+            <a class="nav-link" hx-get="/htmx/today" hx-target="#tab-content" hx-swap="outerHtml">Today</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" hx-get="/htmx/notifications" hx-target="#tab-content" hx-swap="outerHtml">Notifications</a>
@@ -20,7 +17,7 @@
     <hr/>
     <div class="tab-content" role="tabpanel">
         <div class="table-responsive">
-            <table class="table table-striped">
+            <table class="table table-striped table-sm table-bordered">
                 <thead>
                     <tr>
                         <th scope="col">ID</th>
@@ -37,21 +34,21 @@
                     </tr>
                 </thead>
                 <tbody>
-                {{ range .Items }}
-                    <tr>
-                        <td>{{ .ID }}</td>
-                        <td>{{ .Name }}</td>
-                        <td>{{ .CaloriesPer100 }}</td>
-                        <td>{{ .FatsPer100 }}</td>
-                        <td>{{ .FatsSaturatedPer100 }}</td>
-                        <td>{{ .CarbsPer100 }}</td>
-                        <td>{{ .CarbsSugarPer100 }}</td>
-                        <td>{{ .CarbsSlowReleasePer100 }}</td>
-                        <td>{{ .CarbsFastReleasePer100 }}</td>
-                        <td>{{ .ProteinsPer100 }}</td>
-                        <td>{{ .SaltPer100 }}</td>
-                    </tr>
-                {{ end }}
+                    {{ range .Items }}
+                        <tr>
+                            <td>{{ .ID }}</td>
+                            <td>{{ if .Name }}{{ .Name }}{{ else }}-{{ end }}</td>
+                            <td>{{ if .CaloriesPer100 }}{{ formatFloat .CaloriesPer100 2 }}{{ else }}-{{ end }}</td>
+                            <td>{{ if .FatsPer100 }}{{ formatFloat .FatsPer100 2 }}{{ else }}-{{ end }}</td>
+                            <td>{{ if .FatsSaturatedPer100 }}{{ formatFloat .FatsSaturatedPer100 2 }}{{ else }}-{{ end }}</td>
+                            <td>{{ if .CarbsPer100 }}{{ formatFloat .CarbsPer100 2 }}{{ else }}-{{ end }}</td>
+                            <td>{{ if .CarbsSugarPer100 }}{{ formatFloat .CarbsSugarPer100 2 }}{{ else }}-{{ end }}</td>
+                            <td>{{ if .CarbsSlowReleasePer100 }}{{ formatFloat .CarbsSlowReleasePer100 2 }}{{ else }}-{{ end }}</td>
+                            <td>{{ if .CarbsFastReleasePer100 }}{{ formatFloat .CarbsFastReleasePer100 2 }}{{ else }}-{{ end }}</td>
+                            <td>{{ if .ProteinsPer100 }}{{ formatFloat .ProteinsPer100 2 }}{{ else }}-{{ end }}</td>
+                            <td>{{ if .SaltPer100 }}{{ formatFloat .SaltPer100 2 }}{{ else }}-{{ end }}</td>
+                        </tr>
+                    {{ end }}
                 </tbody>
             </table>
         </div>
