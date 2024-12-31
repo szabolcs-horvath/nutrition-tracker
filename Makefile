@@ -6,6 +6,7 @@ GOLANG_MIGRATE_VERSION ?= v4.18.1
 STRINGER_VERSION ?= v0.28.0
 HTMX_VERSION ?= 2.0.3
 BOOTSTRAP_VERSION ?= 5.3.3
+BOOTSTRAP_ICONS_VERSION ?= 1.11.3
 GOCOVERDIR ?= coverage
 CGO_ENABLED=1 # Required for sqlite3 driver
 
@@ -108,3 +109,14 @@ download-bootstrap:
 	curl -O https://cdn.jsdelivr.net/npm/bootstrap@$(BOOTSTRAP_VERSION)/dist/css/bootstrap.min.css; \
 	curl -O https://cdn.jsdelivr.net/npm/bootstrap@$(BOOTSTRAP_VERSION)/dist/js/bootstrap.bundle.min.js; \
 	cd -;
+
+download-bootstrap-icons:
+	cd ./web/static/vendor/bootstrap/icons; \
+	rm -rf ./*; \
+	curl -LO https://github.com/twbs/icons/releases/download/v$(BOOTSTRAP_ICONS_VERSION)/bootstrap-icons-$(BOOTSTRAP_ICONS_VERSION).zip; \
+	unzip -d . bootstrap-icons-$(BOOTSTRAP_ICONS_VERSION).zip; \
+	mv -f bootstrap-icons-$(BOOTSTRAP_ICONS_VERSION)/* .; \
+	rm -rf bootstrap-icons-$(BOOTSTRAP_ICONS_VERSION); \
+	rm bootstrap-icons-$(BOOTSTRAP_ICONS_VERSION).zip; \
+	cd -;
+

@@ -6,10 +6,11 @@
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
             <link href="/static/bootstrap/bootstrap.min.css" rel="stylesheet">
+            <link href="/static/bootstrap/icons/font/bootstrap-icons.min.css" rel="stylesheet">
         </head>
         <body>
             <div class="container">
-                <div id="tab-content">
+                <div class="mt-2" id="tab-content">
                     {{ if eq .TabName "meals_tab" }}
                         {{ template "meals_tab" . }}
                     {{ else if eq .TabName "notifications_tab" }}
