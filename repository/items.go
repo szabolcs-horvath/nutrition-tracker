@@ -117,11 +117,7 @@ func SearchItemsByNameAndUser(ctx context.Context, userId int64, query string) (
 		}
 		result[i].Language = convertLanguage(LanguageSqlcWrapper{n.LanguageSqlc})
 		result[i].DefaultPortion = convertPortion(&n.PortionSqlc)
-		if result[i].Owner != nil {
-			result[i].Portions, err = ListPortionsForItemAndUser(ctx, result[i].ID, &result[i].Owner.ID)
-		} else {
-			result[i].Portions, err = ListPortionsForItemAndUser(ctx, result[i].ID, nil)
-		}
+		result[i].Portions, err = ListPortionsForItemAndUser(ctx, result[i].ID, &userId)
 		if err != nil {
 			return nil, err
 		}

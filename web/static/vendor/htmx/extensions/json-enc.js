@@ -24,7 +24,7 @@ htmx.defineExtension('json-enc', {
 
         const transformedParameters = Object.fromEntries(
             Object.entries(parameters).map(([key, value]) => {
-                const inputElement = elt.querySelector(`[name="${key}"]`);
+                const inputElement = elt.closest('form').querySelector(`[name="${key}"]`);
                 return [key, transformValue(value, inputElement)];
             })
         );

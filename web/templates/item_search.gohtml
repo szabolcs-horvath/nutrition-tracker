@@ -3,21 +3,23 @@
         Add an item to this meal
         <span class="htmx-indicator" style="display: none;">Searching...</span>
     </h3>
-    <input class="form-control mb-2" type="text" placeholder="Search items by name..." name="query" minlength="2"
-           hx-post="/htmx/items/search?meal_id={{ . }}"
-           hx-trigger="keyup[target.value.length >= 2] changed delay:500ms"
-           hx-target="#search-results{{ . }}"
-           hx-indicator=".htmx-indicator">
+    <form>
+        <input class="form-control mb-2" type="text" placeholder="Search items by name..." name="query" minlength="2"
+               hx-post="/htmx/items/search?meal_id={{ . }}"
+               hx-trigger="keyup[target.value.length >= 2] changed delay:500ms"
+               hx-target="#search-results{{ . }}"
+               hx-indicator=".htmx-indicator">
+    </form>
     <div id="search-results{{ . }}"></div>
 {{ end }}
 
 {{ define "item_search_results" }}
     <div class="card">
         <div class="card-body">
-            {{ if eq (len .Data.SearchResults) 0 }}
+            {{ if eq (len .SearchResults) 0 }}
                 <h4>No items found.</h4>
             {{ else }}
-                {{ range .Data.SearchResults }}
+                {{ range .SearchResults }}
                     <div class="card">
                         <div class="card-body">
                             <h4 class="card-title">{{ .Name }}</h4>
@@ -89,13 +91,13 @@
                             </div>
                             <hr/>
                             <form hx-swap="innerHtml"
-                                  hx-target="#meallogs_for_meal_{{ $.Data.Meal.ID }}"
-                                  hx-post="meallogs/meal/{{ $.Data.Meal.ID }}"
+                                  hx-target="#meallogs_for_meal_{{ $.Meal.ID }}"
+                                  hx-post="/htmx/meallogs/meal/{{ $.Meal.ID }}"
                                   hx-ext="json-enc">
                                 <div class="row" hidden>
                                     <div class="col input-group mb-2">
                                         <span class="input-group-text">Meal ID</span>
-                                        <input class="form-control" type="number" value="{{ $.Data.Meal.ID }}" name="meal_id" required readonly>
+                                        <input class="form-control" type="number" value="{{ $.Meal.ID }}" name="meal_id" required readonly>
                                     </div>
                                     <div class="col input-group mb-2">
                                         <span class="input-group-text">Item ID</span>
@@ -119,8 +121,8 @@
                                 <div class="row">
                                     <div class="col input-group mb-2">
                                         <span class="input-group-text">Date Time</span>
-                                        <input id="date_time_input{{ $.Data.Meal.ID }}" class="form-control" type="datetime-local" name="date_time" required>
-                                        <script>document.getElementById("date_time_input{{ $.Data.Meal.ID }}").value = new Date().toLocaleString("sv-SE").slice(0, 16);</script>
+                                        <input id="date_time_input{{ $.Meal.ID }}-{{ .ID }}" class="form-control" type="datetime-local" name="date_time" required>
+                                        <script>document.getElementById("date_time_input{{ $.Meal.ID }}-{{ .ID }}").value = new Date().toLocaleString("sv-SE").slice(0, 16);</script>
                                     </div>
                                 </div>
                                 <button class="form-control mb-2" type="submit">

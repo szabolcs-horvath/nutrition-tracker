@@ -1,6 +1,7 @@
 package htmx
 
 import (
+	"context"
 	"fmt"
 	"github.com/szabolcs-horvath/nutrition-tracker/repository"
 	"github.com/szabolcs-horvath/nutrition-tracker/util"
@@ -17,7 +18,11 @@ func Routes() map[string]http.HandlerFunc {
 		"GET /notifications":           notificationsHandler,
 		"GET /items":                   itemsHandler,
 		"POST /items/search":           itemSearchHandler,
+		"GET /meallogs/{id}":           getMealLogByIdHandler,
 		"POST /meallogs/meal/{mealId}": addMealLogForMealHandler,
+		"GET /meallogs/{id}/edit":      getMealLogEditFormHandler,
+		"PUT /meallogs/{id}/edit":      submitMealLogEditHandler,
+		"DELETE /meallogs/{id}":        deleteMealLogHandler,
 	}
 }
 func rootHandler(w http.ResponseWriter, r *http.Request) {
@@ -36,16 +41,12 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	items, err := repository.ListItems(r.Context())
+
+	mealLogsByMeal, err := getMealLogsByMeal(r.Context(), 1)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	mealLogsByMeal := util.GroupByKeys(mealLogs, meals, func(ml *repository.MealLog) *repository.Meal {
-		meal, _ := util.FindFirst(meals, func(m *repository.Meal) bool { return ml.Meal.ID == m.ID })
-		return meal
-	})
 
 	data := map[string]any{
 		"Title":   "Today",
@@ -55,7 +56,6 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 			"Meals":          meals,
 			"MealLogs":       mealLogs,
 			"MealLogsByMeal": mealLogsByMeal,
-			"Items":          items,
 		},
 	}
 
@@ -63,6 +63,22 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+}
+
+func getMealLogsByMeal(ctx context.Context, userId int64) (map[*repository.Meal][]*repository.MealLog, error) {
+	meals, err := repository.FindMealsForUser(ctx, userId, false)
+	if err != nil {
+		return nil, err
+	}
+	mealLogs, err := repository.FindMealLogsForUserAndCurrentDay(ctx, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	return util.GroupByKeys(mealLogs, meals, func(ml *repository.MealLog) *repository.Meal {
+		meal, _ := util.FindFirst(meals, func(m *repository.Meal) bool { return ml.Meal.ID == m.ID })
+		return meal
+	}), nil
 }
 
 func todayHandler(w http.ResponseWriter, r *http.Request) {
@@ -82,10 +98,11 @@ func todayHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mealLogsByMeal := util.GroupByKeys(mealLogs, meals, func(ml *repository.MealLog) *repository.Meal {
-		meal, _ := util.FindFirst(meals, func(m *repository.Meal) bool { return ml.Meal.ID == m.ID })
-		return meal
-	})
+	mealLogsByMeal, err := getMealLogsByMeal(r.Context(), 1)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	data := map[string]any{
 		"Title":   "Today",
@@ -165,10 +182,8 @@ func itemSearchHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := map[string]any{
-		"Data": map[string]any{
-			"Meal":          meal,
-			"SearchResults": results,
-		},
+		"Meal":          meal,
+		"SearchResults": results,
 	}
 
 	err = repository.Render(w, "item_search_results", data)
@@ -177,9 +192,28 @@ func itemSearchHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func getMealLogByIdHandler(w http.ResponseWriter, r *http.Request) {
+	meallogId, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	meallog, err := repository.FindMealLogById(r.Context(), meallogId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	var userId int64 = 1
+	meallog.Item.Portions, err = repository.ListPortionsForItemAndUser(r.Context(), meallog.Item.ID, &userId)
+
+	err = repository.Render(w, "meallogs_simple_card", meallog)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
 func addMealLogForMealHandler(w http.ResponseWriter, r *http.Request) {
-	mealIdParam := r.PathValue("mealId")
-	mealId, err := strconv.ParseInt(mealIdParam, 10, 64)
+	mealId, err := strconv.ParseInt(r.PathValue("mealId"), 10, 64)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -196,14 +230,88 @@ func addMealLogForMealHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	meal, err := repository.FindMealById(r.Context(), mealId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 	meallogs, err := repository.FindMealLogsForMealAndCurrentDay(r.Context(), mealId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	err = repository.Render(w, "meallogs_simple", meallogs)
+	data := map[string]any{
+		"Meal":     meal,
+		"Meallogs": meallogs,
+	}
+
+	err = repository.Render(w, "meallogs_simple", data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+}
+
+func getMealLogEditFormHandler(w http.ResponseWriter, r *http.Request) {
+	meallogId, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	meallog, err := repository.FindMealLogById(r.Context(), meallogId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	var userId int64 = 1
+	meallog.Item.Portions, err = repository.ListPortionsForItemAndUser(r.Context(), meallog.Item.ID, &userId)
+
+	err = repository.Render(w, "meallogs_simple_card_edit", meallog)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func submitMealLogEditHandler(w http.ResponseWriter, r *http.Request) {
+	meallogId, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	var requestMealLog repository.UpdateMealLogRequest
+	if err = util.ReadJson(r, &requestMealLog); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	requestMealLog.ID = meallogId
+	_, err = repository.UpdateMealLog(r.Context(), requestMealLog)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	meallog, err := repository.FindMealLogById(r.Context(), meallogId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = repository.Render(w, "meallogs_simple_card", meallog)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func deleteMealLogHandler(w http.ResponseWriter, r *http.Request) {
+	meallogId, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err = repository.DeleteMealLog(r.Context(), meallogId); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 }

@@ -12,7 +12,7 @@
                 <div id="collapse{{ $meal.ID }}" class="accordion-collapse collapse" data-bs-parent="#mealsAccordion">
                     <div class="accordion-body">
                         <div id="meallogs_for_meal_{{ $meal.ID }}">
-                            {{ template "meallogs_simple" $meallogs }}
+                            {{ template "meallogs_simple" mapOf "Meal" $meal "Meallogs" $meallogs }}
                         </div>
                         <hr/>
                         {{ range $quotaType, $quotaValue := $meal.Quotas }}

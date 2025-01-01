@@ -1,0 +1,32 @@
+{{- /*gotype: github.com/szabolcs-horvath/nutrition-tracker/repository.MealLog*/ -}}
+{{ define "meallogs_simple_card" }}
+    <div class="card" id="meallog_simple_info-{{ .ID }}">
+        <div class="card-body">
+            <div class="row">
+                <div class="col">
+                    <h6 class="card-title">
+                        {{ .Item.Name }} - {{ .PortionMultiplier }} {{ .Portion.Name }}
+                    </h6>
+                    <h6 class="card-subtitle text-muted">
+                        {{ .DateTime.Format "15:04" }}
+                    </h6>
+                </div>
+                <div class="col text-end">
+                    <button type="button" class="btn btn-outline-warning"
+                            hx-get="/htmx/meallogs/{{ .ID }}/edit"
+                            hx-target="#meallog_simple_info-{{ .ID }}"
+                            hx-swap="outerHtml">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-danger"
+                            hx-delete="/htmx/meallogs/{{ .ID }}"
+                            hx-target="#meallog_simple_info-{{ .ID }}"
+                            hx-swap="outerHtml"
+                            hx-confirm="Are you sure you want to delete this log?">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+{{ end }}

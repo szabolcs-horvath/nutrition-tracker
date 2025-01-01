@@ -55,14 +55,6 @@ func FindFirst[T any](slice []T, predicate func(T) bool) (T, bool) {
 	return backup, false
 }
 
-func Percentage(a, b float64) int64 {
-	return int64(math.Min(a/b*100, 100))
-}
-
-func PercentageRemaining(a, b float64) int64 {
-	return int64(math.Max(100-(a/b*100), 0))
-}
-
 func SafeGetEnv(key string) string {
 	if os.Getenv(key) == "" {
 		slog.Error("[SafeGetEnv] The environment variable '" + key + "' is not set.")
@@ -99,12 +91,19 @@ func TemplateFuncs() template.FuncMap {
 		"subtractFloat64": func(a, b float64) int64 {
 			return int64(a - b)
 		},
-		"getBackground": func(overflow bool) string {
-			if overflow {
-				return "bg-danger"
-			} else {
-				return "bg-success"
+		"mapOf": func(values ...interface{}) (map[string]interface{}, error) {
+			if len(values)%2 != 0 {
+				return nil, fmt.Errorf("dict expects an even number of arguments")
 			}
+			d := make(map[string]interface{})
+			for i := 0; i < len(values); i += 2 {
+				key, ok := values[i].(string)
+				if !ok {
+					return nil, fmt.Errorf("dict keys must be strings")
+				}
+				d[key] = values[i+1]
+			}
+			return d, nil
 		},
 		"formatFloat": func(value any, precision int) any {
 			var floatValue float64
@@ -131,4 +130,12 @@ func TemplateFuncs() template.FuncMap {
 			return formatted
 		},
 	}
+}
+
+func Percentage(a, b float64) int64 {
+	return int64(math.Min(a/b*100, 100))
+}
+
+func PercentageRemaining(a, b float64) int64 {
+	return int64(math.Max(100-(a/b*100), 0))
 }

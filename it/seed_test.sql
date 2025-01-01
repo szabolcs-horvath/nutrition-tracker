@@ -46,10 +46,8 @@ VALUES (1, 'g', NULL, NULL, FALSE, 1, NULL),
        (3, 'dkg', NULL, NULL, FALSE, 10, NULL),
        (4, 'cl', NULL, NULL, TRUE, NULL, 10),
        (5, 'dl', NULL, NULL, TRUE, NULL, 100),
-       (6, 'piece', 1, 1, FALSE, 50, NULL),
-       (7, 'darab', 2, 2, FALSE, 50, NULL),
-       (8, 'cup', 1, 1, TRUE, NULL, 250),
-       (9, 'csésze', 2, 2, TRUE, NULL, 250);
+       (6, 'cup', 1, 1, TRUE, NULL, 250),
+       (7, 'csésze', 2, 2, TRUE, NULL, 250);
 
 -- items
 INSERT INTO items(id, name, owner_id, language_id, liquid, default_portion_id, calories_per_100, fats_per_100, fats_saturated_per_100, carbs_per_100,
@@ -79,13 +77,11 @@ VALUES (1, 'Apple', NULL, 1, FALSE, 6, 52, 0.2, 0.1, 14, 10, 10, 4, 0.3, 0.002),
        (23, 'Fish', 1, 1, FALSE, 1, 206, 13.4, 3.3, 0, 0, 0, 0, 20, 0.1),
        (24, 'Hal', 2, 2, FALSE, 1, 206, 13.4, 3.3, 0, 0, 0, 0, 20, 0.1);
 
--- items_portions_joining_table (only portions which have an owner id should have entries in the joining table; the languages should be matching on the item and the portion)
+-- items_portions_joining_table (only portions which have an owner id should have entries in the joining table; the languages should be matching on the item and the portion; the liquid should be matching on the item and the portion)
 INSERT INTO items_portions_joining_table(item_id, portion_id)
-VALUES (1, 6),
-       (2, 7),
-       (3, 6),
-       (4, 7),
-       (21, 6),
-       (22, 7);
+VALUES (15, 6),
+       (16, 7),
+       (17, 6),
+       (18, 7);
 
 COMMIT TRANSACTION;

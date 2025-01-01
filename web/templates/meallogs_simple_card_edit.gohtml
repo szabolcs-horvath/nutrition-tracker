@@ -1,0 +1,52 @@
+{{ define "meallogs_simple_card_edit" }}
+    <div class="card" id="meallog_simple_info-{{ .ID }}">
+        <div class="card-body">
+            <form>
+                <div class="row">
+                    <input id="meallog_{{ .ID }}_input_id" class="form-control-sm" type="number" value="{{ .ID }}" name="id" required readonly hidden>
+                    <input id="meallog_{{ .ID }}_input_meal_id" class="form-control-sm" type="number" value="{{ .Meal.ID }}" name="meal_id" required readonly hidden>
+                    <input id="meallog_{{ .ID }}_input_item_id" class="form-control-sm" type="number" value="{{ .Item.ID }}" name="item_id" required readonly hidden>
+                    <div class="col">
+                        <h6 class="card-title">
+                            {{ .Item.Name }} -
+                        </h6>
+                    </div>
+                    <div class="col input-group">
+                        <span class="input-group-text">Amount</span>
+                        <input id="meallog_{{ .ID }}_input_portion_multiplier" class="form-control-sm" type="number" name="portion_multiplier" value="{{ .PortionMultiplier }}" step="any" inputmode="decimal" required>
+                    </div>
+                    <div class="col input-group">
+                        <span class="input-group-text">Portion</span>
+                        <select id="meallog_{{ .ID }}_input_portion_id" class="form-control-sm" type="number" name="portion_id" required>
+                            {{ range .Item.Portions }}
+                                <option {{ if eq $.Portion.ID .ID }}selected{{ end }} value="{{ .ID }}">{{ .Name }}</option>
+                            {{ end }}
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col input-group">
+                        <span class="input-group-text">Date Time</span>
+                        <input id="meallog_{{ .ID }}_input_date_time" class="form-control-sm" type="datetime-local" value="{{ .DateTime.Format "2006-01-02 15:04:05" }}" name="date_time" required>
+                    </div>
+                    <div class="col text-end">
+                        <button type="button" class="btn btn-outline-success"
+                                hx-put="/htmx/meallogs/{{ .ID }}/edit"
+                                hx-target="#meallog_simple_info-{{ .ID }}"
+                                hx-include="[id^='meallog_{{ .ID }}_input_']"
+                                hx-swap="outerHtml"
+                                hx-ext="json-enc">
+                            <i class="bi bi-floppy-fill"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-warning"
+                                hx-get="/htmx/meallogs/{{ .ID }}"
+                                hx-target="#meallog_simple_info-{{ .ID }}"
+                                hx-swap="outerHtml">
+                            <i class="bi bi-x-circle-fill"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{{ end }}
