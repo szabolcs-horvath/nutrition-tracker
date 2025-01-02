@@ -20,19 +20,29 @@ This project's purpose is to help Kinga track and plan her diet.
     ```
 
 ### Set up
-1. #### Initialize the database
+1. #### Create a `.env` file with the necessary environment variables
+    ```shell
+    PORT="80"
+    DB_FILE="sqlite/nutrition-tracker.db"
+    AUTH0_DOMAIN="<AUTH0_DOMAIN>"
+    AUTH0_CLIENT_ID="<AUTH0_CLIENT_ID>"
+    AUTH0_CLIENT_SECRET="<AUTH0_CLIENT_SECRET>"
+    AUTH0_CALLBACK_URL="https://nutrition-tracking.com/auth/callback" # Should be the same as the one set in the Auth0 dashboard
+    SESSION_KEY="<KEY_TO_AUTHENTICATE_THE_COOKIE_STORE>" # Should ideally be at least 64 bytes of random data
+    ```
+2. #### Initialize the database
     ```shell
     make init-db
     ```
-
-2. #### Build the project
+3. #### Build the project
     ```shell
     make build
     ```
 
 ## Running
+###### (The .env file only needs to be specified if it is not in the project root)
 ```shell
-out/nutrition-tracker <path-to-.env-file>
+out/nutrition-tracker <PATH_TO_YOUR_ENV_FILE>
 ```
 
 ## Checking test coverage
@@ -49,7 +59,16 @@ make unit-coverage
 make integration-coverage
 ```
 
-## Adding a new migration
+## Migrations
+###### Create a new migration
 ```shell
-make create-migration MIGRATION_NAME=<migration_name>
+make create-migration MIGRATION_NAME=<MIGRATION_NAME>
+```
+###### Apply all migrations
+```shell
+make migrate-up
+```
+###### Rollback the last migration
+```shell
+make migrate-down-1
 ```

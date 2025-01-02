@@ -2,10 +2,14 @@ package main
 
 import (
 	"context"
+	"encoding/gob"
+	"fmt"
+	"github.com/gorilla/sessions"
 	"github.com/joho/godotenv"
 	"github.com/szabolcs-horvath/nutrition-tracker/http_server/middleware"
 	"github.com/szabolcs-horvath/nutrition-tracker/http_server/routes"
 	"github.com/szabolcs-horvath/nutrition-tracker/http_server/routes/api"
+	"github.com/szabolcs-horvath/nutrition-tracker/http_server/routes/auth"
 	"github.com/szabolcs-horvath/nutrition-tracker/http_server/routes/htmx"
 	"github.com/szabolcs-horvath/nutrition-tracker/util"
 	"log/slog"
@@ -16,7 +20,7 @@ import (
 	"time"
 )
 
-func getEnvFile() string {
+func init() {
 	envFile := ".env"
 	if len(os.Args[1:]) > 0 {
 		if os.Args[1] != "" {
@@ -24,27 +28,48 @@ func getEnvFile() string {
 		}
 	}
 	slog.Info("[getEnvFile] Using .env file: " + envFile)
-	return envFile
-}
 
-func main() {
-	envFile := getEnvFile()
 	if err := godotenv.Load(envFile); err != nil {
 		slog.Error("[main] Failed to load .env file!", "FILE", envFile, "ERROR", err)
 		panic(1)
 	}
 
+	if util.SafeGetEnv("AUTH0_DISABLED") != "true" {
+		authenticator, err := util.NewAuthenticator()
+		if err != nil {
+			panic(fmt.Errorf("couldn't initialize the Authenticator instance: %v", err.Error()))
+		}
+		util.AuthenticatorInstance = authenticator
+
+		gob.Register(map[string]interface{}{})
+		util.CookieStoreInstance = sessions.NewCookieStore([]byte(util.SafeGetEnv("SESSION_KEY")))
+		util.CookieStoreInstance.Options = &sessions.Options{
+			Path:     "/",
+			Secure:   false,
+			HttpOnly: false,
+			SameSite: http.SameSiteLaxMode,
+		}
+	}
+}
+
+func main() {
 	router := http.NewServeMux()
+
+	router.HandleFunc("/{$}", routes.RootHandler)
 	routes.ServeRoute(router, api.Prefix, api.Routes())
+	routes.ServeRouteHandlers(router, auth.Prefix, auth.Routes())
 	routes.ServeRouteHandlers(router, htmx.Prefix, htmx.Routes())
 	routes.ServeFS(router, "/static", "web/static/vendor")
 
-	middlewareStack := middleware.CreateStack(
-		middleware.AddRequestId,
-		middleware.LogIncomingRequest,
-		//middleware.Authenticate(util.SafeGetEnv("AUTH0_AUDIENCE"), util.SafeGetEnv("AUTH0_DOMAIN")),
-		middleware.LogCompletedRequest,
-	)
+	middlewares := make([]middleware.Middleware, 0)
+	middlewares = append(middlewares, middleware.AddRequestId)
+	middlewares = append(middlewares, middleware.LogIncomingRequest)
+	if util.SafeGetEnv("AUTH0_DISABLED") != "true" {
+		middlewares = append(middlewares, middleware.IsAuthenticated)
+	}
+	middlewares = append(middlewares, middleware.LogCompletedRequest)
+	middlewareStack := middleware.CreateStack(middlewares...)
+
 	server := http.Server{
 		Addr:    ":" + util.SafeGetEnv("PORT"),
 		Handler: middlewareStack(router),
