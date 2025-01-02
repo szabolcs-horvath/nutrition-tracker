@@ -34,7 +34,7 @@ func init() {
 		panic(1)
 	}
 
-	if util.SafeGetEnv("AUTH0_DISABLED") != "true" {
+	if os.Getenv("AUTH0_DISABLED") != "true" {
 		authenticator, err := util.NewAuthenticator()
 		if err != nil {
 			panic(fmt.Errorf("couldn't initialize the Authenticator instance: %v", err.Error()))
@@ -64,7 +64,7 @@ func main() {
 	middlewares := make([]middleware.Middleware, 0)
 	middlewares = append(middlewares, middleware.AddRequestId)
 	middlewares = append(middlewares, middleware.LogIncomingRequest)
-	if util.SafeGetEnv("AUTH0_DISABLED") != "true" {
+	if os.Getenv("AUTH0_DISABLED") != "true" {
 		middlewares = append(middlewares, middleware.IsAuthenticated)
 	}
 	middlewares = append(middlewares, middleware.LogCompletedRequest)
