@@ -3,14 +3,11 @@ package middleware
 import (
 	"bytes"
 	"context"
-	"github.com/auth0/go-jwt-middleware/v2"
-	"github.com/auth0/go-jwt-middleware/v2/jwks"
-	"github.com/auth0/go-jwt-middleware/v2/validator"
 	"github.com/google/uuid"
+	"github.com/szabolcs-horvath/nutrition-tracker/util"
 	"io"
 	"log/slog"
 	"net/http"
-	"net/url"
 	"slices"
 	"time"
 )
@@ -78,21 +75,24 @@ func LogIncomingRequest(next http.Handler) http.Handler {
 	})
 }
 
-func Authenticate(audience string, domain string) Middleware {
-	return func(next http.Handler) http.Handler {
-		issuerURL, _ := url.Parse("https://" + domain + "/")
-		provider := jwks.NewCachingProvider(issuerURL, 5*time.Minute)
-
-		jwtValidator, _ := validator.New(
-			provider.KeyFunc,
-			validator.RS256,
-			issuerURL.String(),
-			[]string{audience},
-		)
-
-		middleware := jwtmiddleware.New(jwtValidator.ValidateToken)
-		return middleware.CheckJWT(next)
-	}
+func IsAuthenticated(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		session, err := util.CookieStoreInstance.Get(r, "auth-session")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		if session.Values["profile"] == nil {
+			if r.URL.Path == "/auth/login" || r.URL.Path == "/auth/callback" {
+				slog.Warn("[IsAuthenticated] session.Values[\"profile\"] is nil", "PATH", r.URL.Path)
+			} else {
+				slog.Info("[IsAuthenticated] redirecting to the login path...", "PATH", r.URL.Path)
+				http.Redirect(w, r, "/auth/login", http.StatusSeeOther)
+				return
+			}
+		}
+		next.ServeHTTP(w, r)
+	})
 }
 
 func LogCompletedRequest(next http.Handler) http.Handler {

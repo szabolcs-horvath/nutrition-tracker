@@ -1,14 +1,16 @@
 SQLITE_DB_FILE ?= sqlite/nutrition-tracker.db
 IT_SQLITE_DB_FILE ?= it/nutrition-tracker-test.db
 SQLITE_MIGRATIONS_DIR ?= sqlite/migrations
+GOCOVERDIR ?= coverage
+CGO_ENABLED=1 # Required for sqlite3 driver
+
 SQLC_VERSION ?= v1.27.0
 GOLANG_MIGRATE_VERSION ?= v4.18.1
 STRINGER_VERSION ?= v0.28.0
+DELVE_VERSION ?= latest
 HTMX_VERSION ?= 2.0.3
 BOOTSTRAP_VERSION ?= 5.3.3
 BOOTSTRAP_ICONS_VERSION ?= 1.11.3
-GOCOVERDIR ?= coverage
-CGO_ENABLED=1 # Required for sqlite3 driver
 
 install-go-deps:
 	go install -v github.com/sqlc-dev/sqlc/cmd/sqlc@$(SQLC_VERSION)
@@ -21,6 +23,11 @@ init-db: migrate-up
 build: sqlc generate
 	go build -o out/nutrition-tracker -mod=readonly
 
+debug: sqlc generate
+	go install -v github.com/go-delve/delve/cmd/dlv@$(DELVE_VERSION)
+	go build -o out/nutrition-tracker-debug -mod=readonly -gcflags="all=-N -l"
+	dlv --listen=:443 --headless=true --api-version=2 --accept-multiclient exec ./out/nutrition-tracker-debug
+
 sqlc:
 	sqlc generate
 
@@ -29,6 +36,8 @@ generate:
 
 clean:
 	rm -rf generated out
+
+
 
 ut: sqlc
 	rm -f $(GOCOVERDIR)/ut-coverage.out
@@ -56,6 +65,8 @@ coverage-ut: ut
 
 coverage-it: it
 	go tool cover -html=$(GOCOVERDIR)/it-coverage.out
+
+
 
 create-migration:
 ifneq ($(MIGRATION_NAME),)
@@ -99,6 +110,7 @@ else
 endif
 
 
+
 download-htmx:
 	cd ./web/static/vendor/htmx; \
 	curl -O https://unpkg.com/htmx.org@$(HTMX_VERSION)/dist/htmx.min.js; \
@@ -119,4 +131,3 @@ download-bootstrap-icons:
 	rm -rf bootstrap-icons-$(BOOTSTRAP_ICONS_VERSION); \
 	rm bootstrap-icons-$(BOOTSTRAP_ICONS_VERSION).zip; \
 	cd -;
-
