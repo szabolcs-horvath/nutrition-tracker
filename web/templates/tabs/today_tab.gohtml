@@ -1,11 +1,8 @@
 {{ define "today_tab" }}
     {{ template "tabs" "today" }}
-    <hr/>
-    <div class="tab-content" role="tabpanel">
-        {{ if .Data.DailyQuota }}
-            {{ template "daily_quota" .Data }}
-            <hr/>
-        {{ end }}
-        {{ template "meals" .Data }}
-    </div>
+    {{ if .Data.DailyQuota }}
+        {{ template "daily_quota" .Data }}
+        <hr/>
+    {{ end }}
+    {{ template "meals" .Data }}
 {{ end }}

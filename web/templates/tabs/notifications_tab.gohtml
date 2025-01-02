@@ -1,14 +1,7 @@
 {{ define "notifications_tab" }}
-    {{ template "notifications_content" .Data }}
-{{ end }}
-
-{{ define "notifications_content" }}
     {{ template "tabs" "notifications" }}
-    <hr/>
-    <div class="tab-content" role="tabpanel">
-        {{ range .Notifications }}
-            <p>Time: {{ .Time.String }}</p>
-            <br/>
-        {{ end }}
-    </div>
+    {{ range .Data.Notifications }}
+        <p>Time: {{ .Time.String }}</p>
+        <br/>
+    {{ end }}
 {{ end }}

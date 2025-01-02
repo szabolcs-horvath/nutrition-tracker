@@ -1,5 +1,5 @@
 {{ define "tabs" }}
-    <ul class="nav nav-tabs" role="tablist">
+    <ul class="nav nav-tabs mb-2" role="tablist">
         <li class="nav-item">
             <a class="nav-link {{ if eq . "today" }}active{{ end }}" hx-get="/htmx/today" hx-target="#tab-content" hx-swap="outerHtml">Today</a>
         </li>

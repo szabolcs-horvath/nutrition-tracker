@@ -14,15 +14,17 @@
             </div>
             <div class="container">
                 <div class="mt-2" id="tab-content">
-                    {{ if eq .TabName "today_tab" }}
-                        {{ template "today_tab" . }}
-                    {{ else if eq .TabName "notifications_tab" }}
-                        {{ template "notifications_tab" . }}
-                    {{ else if eq .TabName "items_tab" }}
-                        {{ template "items_tab" . }}
-                    {{ else }}
-                        <p>Default or fallback content goes here.</p>
-                    {{ end }}
+                    <div class="tab-content" role="tabpanel">
+                        {{ if eq .TabName "today_tab" }}
+                            {{ template "today_tab" . }}
+                        {{ else if eq .TabName "notifications_tab" }}
+                            {{ template "notifications_tab" . }}
+                        {{ else if eq .TabName "items_tab" }}
+                            {{ template "items_tab" . }}
+                        {{ else }}
+                            <p>Default or fallback content goes here.</p>
+                        {{ end }}
+                    </div>
                 </div>
             </div>
             <script src="/static/bootstrap/bootstrap.bundle.min.js"></script>
