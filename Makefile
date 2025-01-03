@@ -2,7 +2,6 @@ SQLITE_DB_FILE ?= sqlite/nutrition-tracker.db
 IT_SQLITE_DB_FILE ?= it/nutrition-tracker-test.db
 SQLITE_MIGRATIONS_DIR ?= sqlite/migrations
 GOCOVERDIR ?= coverage
-CGO_ENABLED=1 # Required for sqlite3 driver
 
 SQLC_VERSION ?= v1.27.0
 GOLANG_MIGRATE_VERSION ?= v4.18.1
@@ -12,9 +11,16 @@ HTMX_VERSION ?= 2.0.3
 BOOTSTRAP_VERSION ?= 5.3.3
 BOOTSTRAP_ICONS_VERSION ?= 1.11.3
 
+install: install-go-deps init-db build
+	cp -u prod/nutrition-tracker.service /etc/systemd/system/nutrition-tracker.service
+	systemctl enable nutrition-tracker.service
+
+start:
+	systemctl start nutrition-tracker.service
+
 install-go-deps:
 	go install -v github.com/sqlc-dev/sqlc/cmd/sqlc@$(SQLC_VERSION)
-	go install -v -tags 'sqlite3' github.com/golang-migrate/migrate/v4/cmd/migrate@$(GOLANG_MIGRATE_VERSION)
+	CGO_ENABLED=1 go install -v -tags 'sqlite3' github.com/golang-migrate/migrate/v4/cmd/migrate@$(GOLANG_MIGRATE_VERSION)
 	go install -v golang.org/x/tools/cmd/stringer@$(STRINGER_VERSION)
 
 init-db: migrate-up

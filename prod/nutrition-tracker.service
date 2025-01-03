@@ -1,0 +1,20 @@
+[Unit]
+Description=Nutrition Tracker server
+ConditionFileNotEmpty=/root/nutrition-tracker/.env
+ConditionPathExists=/root/nutrition-tracker/sqlite/nutrition-tracker.db
+After=multi-user.target
+Wants=multi-user.target
+StartLimitIntervalSec=600
+StartLimitBurst=5
+
+[Service]
+Type=simple
+WorkingDirectory=/root/nutrition-tracker
+ExecStartPre=/bin/bash -c 'echo "$(date +"%%F-%%T") starting" >> /var/log/nutrition-tracker-starts.log'
+ExecStart=/bin/bash -c '/root/nutrition-tracker/out/nutrition-tracker /root/nutrition-tracker/.env 2>&1 | tee /var/log/nutrition-tracker.log && exit ${PIPESTATUS[0]}'
+ExecStartPost=/bin/bash -c 'echo "$(date +"%%F-%%T") started" >> /var/log/nutrition-tracker-starts.log'
+Restart=on-failure
+TimeoutSec=30
+
+[Install]
+WantedBy=multi-user.target

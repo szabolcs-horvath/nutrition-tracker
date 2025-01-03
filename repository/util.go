@@ -5,15 +5,22 @@ import (
 	"github.com/szabolcs-horvath/nutrition-tracker/util"
 	"html/template"
 	"io"
+	"os"
+	"path/filepath"
 	"time"
 )
 
 var templates *template.Template
 
 func init() {
+	exe, err := os.Executable()
+	if err != nil {
+		panic(err.Error())
+	}
+	pwd := filepath.Dir(exe)
 	templates = template.New("templates").Funcs(util.TemplateFuncs()).Funcs(TemplateFuncs())
-	template.Must(templates.ParseGlob("web/templates/*.gohtml"))
-	template.Must(templates.ParseGlob("web/templates/**/*.gohtml"))
+	template.Must(templates.ParseGlob(pwd + "/../web/templates/*.gohtml"))
+	template.Must(templates.ParseGlob(pwd + "/../web/templates/**/*.gohtml"))
 }
 
 func Render(w io.Writer, name string, data any) error {
