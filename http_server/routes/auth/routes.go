@@ -72,7 +72,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
-	logoutUrl, err := url.Parse("https://" + util.SafeGetEnv("AUTH0_DOMAIN") + "/v2/logout")
+	logoutUrl, err := url.Parse("https://" + util.GetEnvSafe("AUTH0_DOMAIN") + "/v2/logout")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -89,7 +89,7 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 
 	parameters := url.Values{}
 	parameters.Add("returnTo", returnTo.String())
-	parameters.Add("client_id", util.SafeGetEnv("AUTH0_CLIENT_ID"))
+	parameters.Add("client_id", util.GetEnvSafe("AUTH0_CLIENT_ID"))
 	logoutUrl.RawQuery = parameters.Encode()
 
 	session, err := util.CookieStoreInstance.Get(r, "auth-session")

@@ -40,3 +40,6 @@ out/
 
 # coverage files
 /coverage
+
+# certificates
+/certs

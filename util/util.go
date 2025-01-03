@@ -8,6 +8,7 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -55,12 +56,37 @@ func FindFirst[T any](slice []T, predicate func(T) bool) (T, bool) {
 	return backup, false
 }
 
-func SafeGetEnv(key string) string {
+func GetEnvSafe(key string) string {
 	if os.Getenv(key) == "" {
-		slog.Error("[SafeGetEnv] The environment variable '" + key + "' is not set.")
+		slog.Error("[GetEnvSafe] The environment variable '" + key + "' is not set.")
 		panic(1)
 	}
 	return os.Getenv(key)
+}
+
+func GetEnvOrElse(key, orElse string) string {
+	if os.Getenv(key) == "" {
+		slog.Info("[GetEnvOrElse] The environment variable '" + key + "' is not set, therefore returning the default value.")
+		return orElse
+	}
+	return os.Getenv(key)
+}
+
+func GetEnvFlag(key string) bool {
+	if val, err := strconv.ParseBool(os.Getenv(key)); err != nil {
+		slog.Info("[GetEnvFlag] Couldn't parse value for environment variable '" + key + "' as a bool, therefore returning the default false value.")
+		return false
+	} else {
+		return val
+	}
+}
+
+func GetPwdSafe() string {
+	exe, err := os.Executable()
+	if err != nil {
+		panic(err.Error())
+	}
+	return filepath.Dir(exe)
 }
 
 func ReadJson(r *http.Request, target interface{}) error {

@@ -137,3 +137,16 @@ download-bootstrap-icons:
 	rm -rf bootstrap-icons-$(BOOTSTRAP_ICONS_VERSION); \
 	rm bootstrap-icons-$(BOOTSTRAP_ICONS_VERSION).zip; \
 	cd -;
+
+create-self-signed-cert:
+	mkdir -p certs
+	openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
+		-out certs/cert.pem \
+		-keyout certs/key.pem \
+		-subj "/CN=localhost"
+
+create-self-signed-cert-interactive:
+	mkdir -p certs
+	openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
+		-out certs/cert.pem \
+		-keyout certs/key.pem

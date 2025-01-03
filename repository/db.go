@@ -6,6 +6,10 @@ import (
 	"github.com/szabolcs-horvath/nutrition-tracker/util"
 )
 
+const (
+	DbFileKey = "DB_FILE"
+)
+
 func GetDB() (*sql.DB, error) {
-	return sql.Open("sqlite3", util.SafeGetEnv("DB_FILE"))
+	return sql.Open("sqlite3", util.GetEnvSafe(DbFileKey))
 }

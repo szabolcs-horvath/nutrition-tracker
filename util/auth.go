@@ -22,16 +22,16 @@ type Authenticator struct {
 func NewAuthenticator() (*Authenticator, error) {
 	provider, err := oidc.NewProvider(
 		context.Background(),
-		"https://"+SafeGetEnv("AUTH0_DOMAIN")+"/",
+		"https://"+GetEnvSafe("AUTH0_DOMAIN")+"/",
 	)
 	if err != nil {
 		return nil, err
 	}
 
 	conf := oauth2.Config{
-		ClientID:     SafeGetEnv("AUTH0_CLIENT_ID"),
-		ClientSecret: SafeGetEnv("AUTH0_CLIENT_SECRET"),
-		RedirectURL:  SafeGetEnv("AUTH0_CALLBACK_URL"),
+		ClientID:     GetEnvSafe("AUTH0_CLIENT_ID"),
+		ClientSecret: GetEnvSafe("AUTH0_CLIENT_SECRET"),
+		RedirectURL:  GetEnvSafe("AUTH0_CALLBACK_URL"),
 		Endpoint:     provider.Endpoint(),
 		Scopes:       []string{oidc.ScopeOpenID, "profile"},
 	}
