@@ -22,13 +22,19 @@ This project's purpose is to help Kinga track and plan her diet.
 ### Set up
 1. #### Create a `.env` file with the necessary environment variables
     ```shell
-    PORT="80"
     DB_FILE="sqlite/nutrition-tracker.db"
-    AUTH0_DOMAIN="<AUTH0_DOMAIN>"
-    AUTH0_CLIENT_ID="<AUTH0_CLIENT_ID>"
-    AUTH0_CLIENT_SECRET="<AUTH0_CLIENT_SECRET>"
+    PORT="6969" # Optional, defaults to "80" or "443" depending on whether TLS is enabled
+    
+    TLS_DISABLED="false" # Optional, defaults to "false"
+    TLS_CERT_FILE="certs/cert.pem" # Optional, defaults to "certs/cert.pem"
+    TLS_KEY_FILE="certs/key.pem" # Optional, defaults to "certs/key.pem"
+   
+    AUTH0_DISABLED="false" # Optional, defaults to "false"
+    AUTH0_DOMAIN="<AUTH0_DOMAIN>" # Can be found in the Auth0 dashboard
+    AUTH0_CLIENT_ID="<AUTH0_CLIENT_ID>" # Can be found in the Auth0 dashboard
+    AUTH0_CLIENT_SECRET="<AUTH0_CLIENT_SECRET>" # Can be found in the Auth0 dashboard
     AUTH0_CALLBACK_URL="https://nutrition-tracking.com/auth/callback" # Should be the same as the one set in the Auth0 dashboard
-    SESSION_KEY="<KEY_TO_AUTHENTICATE_THE_COOKIE_STORE>" # Should ideally be at least 64 bytes of random data
+    COOKIE_STORE_AUTH_KEY="<KEY_TO_AUTHENTICATE_THE_COOKIE_STORE>" # Should ideally be at least 64 bytes of random data
     ```
 2. #### Initialize the database
     ```shell
