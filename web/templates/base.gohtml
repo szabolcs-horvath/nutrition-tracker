@@ -9,24 +9,32 @@
             <link href="/static/bootstrap/icons/font/bootstrap-icons.min.css" rel="stylesheet">
         </head>
         <body>
-            <div>
-                <button onclick="document.cookie=''; location.href='/auth/logout';">Logout</button>
-            </div>
-            <div class="container">
-                <div class="mt-2" id="tab-content">
-                    <div class="tab-content" role="tabpanel">
-                        {{ if eq .TabName "today_tab" }}
-                            {{ template "today_tab" . }}
-                        {{ else if eq .TabName "notifications_tab" }}
-                            {{ template "notifications_tab" . }}
-                        {{ else if eq .TabName "items_tab" }}
-                            {{ template "items_tab" . }}
-                        {{ else }}
-                            <p>Default or fallback content goes here.</p>
-                        {{ end }}
+            <main>
+                <div>
+                    <button onclick="document.cookie=''; location.href='/auth/logout';">Logout</button>
+                </div>
+                <div class="container">
+                    <div class="mt-2" id="tab-content">
+                        <div class="tab-content" role="tabpanel">
+                            {{ if eq .TabName "today_tab" }}
+                                {{ template "today_tab" . }}
+                            {{ else if eq .TabName "notifications_tab" }}
+                                {{ template "notifications_tab" . }}
+                            {{ else if eq .TabName "items_tab" }}
+                                {{ template "items_tab" . }}
+                            {{ else }}
+                                <p>Default or fallback content goes here.</p>
+                            {{ end }}
+                        </div>
                     </div>
                 </div>
-            </div>
+            </main>
+            <footer class="footer mt-auto py-3 text-center">
+                <div class="container">
+                    <p>Szabolcs Horváth assumes no responsibility for the quality of this website. By using it, you acknowledge and accept the risk of potential harm.</p>
+                    <p class="text-muted">You may report missing features or potential bugs to him privately if you must.</p>
+                </div>
+            </footer>
             <script src="/static/bootstrap/bootstrap.bundle.min.js"></script>
             <script src="/static/htmx/htmx.min.js"></script>
             <script src="/static/htmx/extensions/json-enc.js"></script>
