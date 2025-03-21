@@ -125,7 +125,7 @@ func main() {
 	routes.ServeRoute(router, api.Prefix, api.Routes())
 	routes.ServeRouteHandlers(router, auth.Prefix, auth.Routes())
 	routes.ServeRouteHandlers(router, htmx.Prefix, htmx.Routes())
-	routes.ServeFS(router, "/static", "web/static/vendor")
+	routes.ServeFS(router, "/static", "web/static")
 
 	middlewares := make([]middleware.Middleware, 0)
 	middlewares = append(middlewares, middleware.AddRequestId)

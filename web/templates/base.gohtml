@@ -5,8 +5,10 @@
             <title>Nutrition Tracker</title>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
-            <link href="/static/bootstrap/bootstrap.min.css" rel="stylesheet">
-            <link href="/static/bootstrap/icons/font/bootstrap-icons.min.css" rel="stylesheet">
+            <link href="/static/manifest.json" rel="manifest">
+            <link href="/static/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
+            <link href="/static/vendor/bootstrap/icons/font/bootstrap-icons.min.css" rel="stylesheet">
+            <link href="/static/favicon.svg" rel="icon" type="image/svg+xml">
         </head>
         <body>
             <main>
@@ -33,11 +35,12 @@
                 <div class="container">
                     <p>Szabolcs Horváth assumes no responsibility for the quality of this website. By using it, you acknowledge and accept the risk of potential harm.</p>
                     <p class="text-muted">You may report missing features or potential bugs to him privately if you must.</p>
+                    <p class="text-muted small">Vectors and icons by <a href="https://www.svgrepo.com" target="_blank">SVG Repo</a></p>
                 </div>
             </footer>
-            <script src="/static/bootstrap/bootstrap.bundle.min.js"></script>
-            <script src="/static/htmx/htmx.min.js"></script>
-            <script src="/static/htmx/extensions/json-enc.js"></script>
+            <script src="/static/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+            <script src="/static/vendor/htmx/htmx.min.js"></script>
+            <script src="/static/vendor/htmx/extensions/json-enc.js"></script>
         </body>
     </html>
 {{ end }}
