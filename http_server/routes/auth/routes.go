@@ -3,9 +3,10 @@ package auth
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"github.com/szabolcs-horvath/nutrition-tracker/util"
 	"net/http"
 	"net/url"
+
+	"github.com/szabolcs-horvath/nutrition-tracker/util"
 )
 
 const Prefix = "/auth"
@@ -50,7 +51,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to verify ID Token.", http.StatusInternalServerError)
 		return
 	}
-	var profile map[string]interface{}
+	var profile map[string]any
 	if err = idToken.Claims(&profile); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

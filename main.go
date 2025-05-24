@@ -4,6 +4,13 @@ import (
 	"context"
 	"encoding/gob"
 	"fmt"
+	"log/slog"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
 	"github.com/gorilla/sessions"
 	"github.com/joho/godotenv"
 	"github.com/szabolcs-horvath/nutrition-tracker/http_server/middleware"
@@ -12,12 +19,6 @@ import (
 	"github.com/szabolcs-horvath/nutrition-tracker/http_server/routes/auth"
 	"github.com/szabolcs-horvath/nutrition-tracker/http_server/routes/htmx"
 	"github.com/szabolcs-horvath/nutrition-tracker/util"
-	"log/slog"
-	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
 )
 
 const (
@@ -63,7 +64,7 @@ func init() {
 		}
 		util.AuthenticatorInstance = authenticator
 
-		gob.Register(map[string]interface{}{})
+		gob.Register(map[string]any{})
 		util.CookieStoreInstance = sessions.NewCookieStore([]byte(util.GetEnvSafe("COOKIE_STORE_AUTH_KEY")))
 		util.CookieStoreInstance.Options = &sessions.Options{
 			Path:     "/",

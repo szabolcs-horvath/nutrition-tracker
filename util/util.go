@@ -89,11 +89,11 @@ func GetPwdSafe() string {
 	return filepath.Dir(exe)
 }
 
-func ReadJson(r *http.Request, target interface{}) error {
+func ReadJson(r *http.Request, target any) error {
 	return json.NewDecoder(r.Body).Decode(target)
 }
 
-func WriteJson(w http.ResponseWriter, status int, data interface{}) error {
+func WriteJson(w http.ResponseWriter, status int, data any) error {
 	js, err := json.Marshal(data)
 	if err != nil {
 		return err
@@ -117,11 +117,11 @@ func TemplateFuncs() template.FuncMap {
 		"subtractFloat64": func(a, b float64) int64 {
 			return int64(a - b)
 		},
-		"mapOf": func(values ...interface{}) (map[string]interface{}, error) {
+		"mapOf": func(values ...any) (map[string]any, error) {
 			if len(values)%2 != 0 {
 				return nil, fmt.Errorf("dict expects an even number of arguments")
 			}
-			d := make(map[string]interface{})
+			d := make(map[string]any)
 			for i := 0; i < len(values); i += 2 {
 				key, ok := values[i].(string)
 				if !ok {
